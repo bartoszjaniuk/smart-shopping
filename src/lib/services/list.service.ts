@@ -5,8 +5,9 @@
 
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { Database } from "../../db/database.types";
-import type { ListDto, ListRow } from "../../types";
+import type { ListDetailDto, ListDto, ListRow, ListSummaryDto, PaginationMeta } from "../../types";
 import type { TablesInsert } from "../../db/database.types";
+import type { MembershipRole } from "../../types";
 
 /** Thrown when user is on Basic plan and already has one list (limit 1). Maps to 403. */
 export class PlanLimitError extends Error {
@@ -15,6 +16,26 @@ export class PlanLimitError extends Error {
   constructor(message = "Basic plan allows only one list. Upgrade to add more.") {
     super(message);
     this.name = "PlanLimitError";
+  }
+}
+
+/** Thrown when user has no access or is not the owner (PATCH/DELETE). Maps to 403. */
+export class ForbiddenError extends Error {
+  readonly statusCode = 403 as const;
+
+  constructor(message = "Forbidden") {
+    super(message);
+    this.name = "ForbiddenError";
+  }
+}
+
+/** Thrown when the list does not exist or user has no access. Maps to 404. */
+export class NotFoundError extends Error {
+  readonly statusCode = 404 as const;
+
+  constructor(message = "Not Found") {
+    super(message);
+    this.name = "NotFoundError";
   }
 }
 
@@ -121,4 +142,294 @@ function toListDto(row: ListRow): ListDto {
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
+}
+
+/** Row shape returned by lists + list_memberships!inner(role) join (one membership per list for current user). */
+type ListWithMembershipRow = ListRow & {
+  list_memberships: { role: MembershipRole }[];
+};
+
+/** Options for listLists pagination. */
+export interface ListListsOptions {
+  page: number;
+  pageSize: number;
+}
+
+/**
+ * Returns paginated lists the user can access (owner or editor), with computed is_disabled and my_role.
+ * is_disabled: true when list owner is on Basic plan and this list is not their first (by created_at ASC).
+ * item_count is included per list (one batch count query).
+ *
+ * @param supabase - Supabase client from context.locals (user JWT)
+ * @param userId - auth.uid()
+ * @param options - page (1-based) and pageSize (1–100)
+ * @returns { data: ListSummaryDto[]; meta: PaginationMeta }
+ * @throws Error on Supabase/DB errors – map to 500 in route
+ */
+export async function listLists(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  options: ListListsOptions
+): Promise<{ data: ListSummaryDto[]; meta: PaginationMeta }> {
+  const { page, pageSize } = options;
+  const from = (page - 1) * pageSize;
+  const to = page * pageSize - 1;
+
+  const {
+    data: rows,
+    error: listError,
+    count: totalCount,
+  } = await supabase
+    .from("lists")
+    .select("*, list_memberships!inner(role)", { count: "exact" })
+    .eq("list_memberships.user_id", userId)
+    .order("updated_at", { ascending: false })
+    .range(from, to);
+
+  if (listError) {
+    console.error("[list.service] listLists lists query error:", listError.message);
+    throw new Error("Failed to load lists");
+  }
+
+  const listRows = (rows ?? []) as ListWithMembershipRow[];
+  const total_count = totalCount ?? 0;
+
+  if (listRows.length === 0) {
+    return {
+      data: [],
+      meta: { page, page_size: pageSize, total_count },
+    };
+  }
+
+  const listIds = listRows.map((r) => r.id);
+  const ownerIds = [...new Set(listRows.map((r) => r.owner_id))];
+
+  const disabledListIds = await computeDisabledListIds(supabase, ownerIds);
+  const itemCountByListId = await fetchItemCountsByListId(supabase, listIds);
+
+  const data: ListSummaryDto[] = listRows.map((row) => {
+    const my_role = row.list_memberships[0]?.role ?? "editor";
+    return {
+      id: row.id,
+      owner_id: row.owner_id,
+      name: row.name,
+      color: row.color,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      is_disabled: disabledListIds.has(row.id),
+      item_count: itemCountByListId.get(row.id),
+      my_role,
+    };
+  });
+
+  return {
+    data,
+    meta: { page, page_size: pageSize, total_count },
+  };
+}
+
+/**
+ * Returns a single list by id if the user has access (owner or member). Returns null if
+ * the list does not exist or the user is not in list_memberships.
+ *
+ * @param supabase - Supabase client from context.locals (user JWT)
+ * @param userId - auth.uid()
+ * @param listId - List UUID
+ * @returns ListDetailDto with is_disabled and my_role, or null when not found / no access
+ * @throws Error on Supabase/DB errors – map to 500 in route
+ */
+export async function getListById(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  listId: string
+): Promise<ListDetailDto | null> {
+  const { data: row, error } = await supabase
+    .from("lists")
+    .select("*, list_memberships!inner(role)")
+    .eq("id", listId)
+    .eq("list_memberships.user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[list.service] getListById error:", error.message);
+    throw new Error("Failed to load list");
+  }
+
+  if (!row) return null;
+
+  const listRow = row as ListWithMembershipRow;
+  const disabledListIds = await computeDisabledListIds(supabase, [listRow.owner_id]);
+  const my_role = listRow.list_memberships[0]?.role ?? "editor";
+
+  return {
+    id: listRow.id,
+    owner_id: listRow.owner_id,
+    name: listRow.name,
+    color: listRow.color,
+    created_at: listRow.created_at,
+    updated_at: listRow.updated_at,
+    is_disabled: disabledListIds.has(listRow.id),
+    my_role,
+  };
+}
+
+/** Validated body for updateList: at least one of name or color (only provided fields). */
+export interface UpdateListValidatedBody {
+  name?: string;
+  color?: string;
+}
+
+/**
+ * Updates list name and/or color. Allowed only for the list owner.
+ *
+ * @param supabase - Supabase client from context.locals (user JWT)
+ * @param userId - auth.uid()
+ * @param listId - List UUID
+ * @param body - Validated body (only name and/or color; only provided fields are updated)
+ * @returns Updated list as ListDetailDto
+ * @throws NotFoundError when list does not exist
+ * @throws ForbiddenError when user is not the owner
+ * @throws Error on Supabase/DB errors – map to 500 in route
+ */
+export async function updateList(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  listId: string,
+  body: UpdateListValidatedBody
+): Promise<ListDetailDto> {
+  const { data: listRow, error: fetchError } = await supabase
+    .from("lists")
+    .select("id, owner_id")
+    .eq("id", listId)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error("[list.service] updateList fetch error:", fetchError.message);
+    throw new Error("Failed to load list");
+  }
+
+  if (!listRow) throw new NotFoundError("Not Found");
+
+  if (listRow.owner_id !== userId) throw new ForbiddenError("Forbidden");
+
+  const updatePayload: { name?: string; color?: string } = {};
+  if (body.name !== undefined) updatePayload.name = body.name;
+  if (body.color !== undefined) updatePayload.color = body.color;
+
+  const { error: updateError } = await supabase.from("lists").update(updatePayload).eq("id", listId);
+
+  if (updateError) {
+    console.error("[list.service] updateList update error:", updateError.message);
+    throw new Error("Failed to update list");
+  }
+
+  const updated = await getListById(supabase, userId, listId);
+  if (!updated) {
+    console.error("[list.service] updateList getListById returned null after update");
+    throw new Error("Failed to load updated list");
+  }
+  return updated;
+}
+
+/**
+ * Deletes a list (cascade in DB removes list_memberships, list_items, invite_codes). Allowed only for the list owner.
+ *
+ * @param supabase - Supabase client from context.locals (user JWT)
+ * @param userId - auth.uid()
+ * @param listId - List UUID
+ * @throws NotFoundError when list does not exist
+ * @throws ForbiddenError when user is not the owner
+ * @throws Error on Supabase/DB errors – map to 500 in route
+ */
+export async function deleteList(supabase: SupabaseClient<Database>, userId: string, listId: string): Promise<void> {
+  const { data: listRow, error: fetchError } = await supabase
+    .from("lists")
+    .select("id, owner_id")
+    .eq("id", listId)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error("[list.service] deleteList fetch error:", fetchError.message);
+    throw new Error("Failed to load list");
+  }
+
+  if (!listRow) throw new NotFoundError("Not Found");
+
+  if (listRow.owner_id !== userId) throw new ForbiddenError("Forbidden");
+
+  const { error: deleteError } = await supabase.from("lists").delete().eq("id", listId);
+
+  if (deleteError) {
+    console.error("[list.service] deleteList error:", deleteError.message);
+    throw new Error("Failed to delete list");
+  }
+}
+
+/**
+ * Fetches plan per owner; for Basic plan owners, fetches all their lists in one query
+ * (created_at ASC) and marks all but the first per owner as disabled.
+ * @returns Set of list ids that should have is_disabled: true
+ */
+async function computeDisabledListIds(supabase: SupabaseClient<Database>, ownerIds: string[]): Promise<Set<string>> {
+  if (ownerIds.length === 0) return new Set();
+
+  const { data: profiles, error: profileError } = await supabase
+    .from("profiles")
+    .select("user_id, plan")
+    .in("user_id", ownerIds);
+
+  if (profileError) {
+    console.error("[list.service] listLists profiles query error:", profileError.message);
+    return new Set();
+  }
+
+  const basicOwnerIds = (profiles ?? []).filter((p) => p.plan === "basic").map((p) => p.user_id);
+  if (basicOwnerIds.length === 0) return new Set();
+
+  const { data: allBasicLists, error: listsError } = await supabase
+    .from("lists")
+    .select("id, owner_id, created_at")
+    .in("owner_id", basicOwnerIds);
+
+  if (listsError) {
+    console.error("[list.service] listLists owner lists query error:", listsError.message);
+    return new Set();
+  }
+
+  const disabledListIds = new Set<string>();
+  const byOwner = new Map<string, { id: string; created_at: string }[]>();
+  for (const row of allBasicLists ?? []) {
+    const arr = byOwner.get(row.owner_id) ?? [];
+    arr.push({ id: row.id, created_at: row.created_at });
+    byOwner.set(row.owner_id, arr);
+  }
+  byOwner.forEach((lists) => {
+    lists.sort((a, b) => a.created_at.localeCompare(b.created_at));
+    lists.slice(1).forEach((l) => disabledListIds.add(l.id));
+  });
+
+  return disabledListIds;
+}
+
+/**
+ * Returns map of list_id -> count of list_items for the given list ids (one query).
+ */
+async function fetchItemCountsByListId(
+  supabase: SupabaseClient<Database>,
+  listIds: string[]
+): Promise<Map<string, number>> {
+  if (listIds.length === 0) return new Map();
+
+  const { data: items, error } = await supabase.from("list_items").select("list_id").in("list_id", listIds);
+
+  if (error) {
+    console.error("[list.service] listLists list_items count error:", error.message);
+    return new Map();
+  }
+
+  const map = new Map<string, number>();
+  for (const row of items ?? []) {
+    map.set(row.list_id, (map.get(row.list_id) ?? 0) + 1);
+  }
+  return map;
 }
