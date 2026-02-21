@@ -10,6 +10,7 @@ const PUBLIC_PATHS = [
   "/api/auth/register",
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
+  "/api/categories",
 ];
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
