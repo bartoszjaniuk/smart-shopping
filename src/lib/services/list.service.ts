@@ -5,7 +5,7 @@
 
 import type { SupabaseClient } from "../../db/supabase.client";
 import type { Database } from "../../db/database.types";
-import type { ListDetailDto, ListDto, ListRow, ListSummaryDto, PaginationMeta } from "../../types";
+import type { ListDetailDto, ListDto, ListMemberDto, ListRow, ListSummaryDto, PaginationMeta } from "../../types";
 import type { TablesInsert } from "../../db/database.types";
 import type { MembershipRole } from "../../types";
 
@@ -36,6 +36,16 @@ export class NotFoundError extends Error {
   constructor(message = "Not Found") {
     super(message);
     this.name = "NotFoundError";
+  }
+}
+
+/** Thrown when request is invalid (e.g. removing the last owner). Maps to 400. */
+export class BadRequestError extends Error {
+  readonly statusCode = 400 as const;
+
+  constructor(message = "Bad Request") {
+    super(message);
+    this.name = "BadRequestError";
   }
 }
 
@@ -362,6 +372,115 @@ export async function deleteList(supabase: SupabaseClient<Database>, userId: str
   if (deleteError) {
     console.error("[list.service] deleteList error:", deleteError.message);
     throw new Error("Failed to delete list");
+  }
+}
+
+/**
+ * Returns list members (owner and editors) for a list the user can access.
+ * Email is set to empty string (MVP; can be replaced with Auth Admin or DB later).
+ *
+ * @param supabase - Supabase client from context.locals (user JWT)
+ * @param userId - auth.uid()
+ * @param listId - List UUID
+ * @returns ListMemberDto[] or null when list does not exist or user has no access
+ * @throws Error on Supabase/DB errors – map to 500 in route
+ */
+export async function getListMembers(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  listId: string
+): Promise<ListMemberDto[] | null> {
+  const list = await getListById(supabase, userId, listId);
+  if (!list) return null;
+
+  const { data: rows, error } = await supabase
+    .from("list_memberships")
+    .select("id, list_id, user_id, role, created_at")
+    .eq("list_id", listId);
+
+  if (error) {
+    console.error("[list.service] getListMembers error:", error.message);
+    throw new Error("Failed to load list members");
+  }
+
+  const members: ListMemberDto[] = (rows ?? []).map((row) => ({
+    id: row.id,
+    list_id: row.list_id,
+    user_id: row.user_id,
+    role: row.role,
+    created_at: row.created_at,
+    email: "",
+  }));
+
+  return members;
+}
+
+/**
+ * Removes a membership from the list. Owner can remove any member (including self);
+ * editor can remove only themselves. Cannot remove the last owner (400).
+ *
+ * @param supabase - Supabase client from context.locals (user JWT)
+ * @param currentUserId - auth.uid()
+ * @param listId - List UUID
+ * @param targetUserId - User UUID whose membership is to be removed
+ * @throws NotFoundError when list does not exist, no access, or target is not a member
+ * @throws ForbiddenError when editor tries to remove another user
+ * @throws BadRequestError when removing the last owner
+ * @throws Error on Supabase/DB errors – map to 500 in route
+ */
+export async function removeListMember(
+  supabase: SupabaseClient<Database>,
+  currentUserId: string,
+  listId: string,
+  targetUserId: string
+): Promise<void> {
+  const list = await getListById(supabase, currentUserId, listId);
+  if (!list) throw new NotFoundError("Not Found");
+
+  const { data: targetMembership, error: memError } = await supabase
+    .from("list_memberships")
+    .select("id, role")
+    .eq("list_id", listId)
+    .eq("user_id", targetUserId)
+    .maybeSingle();
+
+  if (memError) {
+    console.error("[list.service] removeListMember fetch membership error:", memError.message);
+    throw new Error("Failed to load membership");
+  }
+
+  if (!targetMembership) throw new NotFoundError("Not Found");
+
+  if (list.my_role === "editor" && targetUserId !== currentUserId) {
+    throw new ForbiddenError("Forbidden");
+  }
+
+  if (targetMembership.role === "owner") {
+    const { count, error: countError } = await supabase
+      .from("list_memberships")
+      .select("id", { count: "exact", head: true })
+      .eq("list_id", listId)
+      .eq("role", "owner");
+
+    if (countError) {
+      console.error("[list.service] removeListMember owner count error:", countError.message);
+      throw new Error("Failed to check owners");
+    }
+
+    if (count !== null && count <= 1) {
+      throw new BadRequestError("Cannot remove the last owner");
+    }
+  }
+
+  const { error: deleteError } = await supabase
+    .from("list_memberships")
+    .delete()
+    .eq("list_id", listId)
+    .eq("user_id", targetUserId);
+
+  if (deleteError) {
+    console.error("[list.service] removeListMember delete error:", deleteError.message);
+    throw new Error("Failed to remove member");
   }
 }
 

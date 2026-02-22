@@ -96,6 +96,23 @@ export function parseListIdParam(listId: string | undefined): string {
   return listIdParamSchema.parse(listId ?? "");
 }
 
+// ---------------------------------------------------------------------------
+// GET / DELETE /api/lists/:listId/members[/:userId] – path params
+// ---------------------------------------------------------------------------
+
+/** Schema for userId path segment (members). Must be a valid UUID. */
+export const userIdParamSchema = z.string().uuid("userId must be a valid UUID");
+
+/**
+ * Parses and validates userId from route params (e.g. context.params.userId).
+ * @param userId - Raw segment from URL (may be undefined if route not matched)
+ * @returns Valid UUID string
+ * @throws ZodError when userId is missing or not a valid UUID
+ */
+export function parseUserIdParam(userId: string | undefined): string {
+  return userIdParamSchema.parse(userId ?? "");
+}
+
 /** Schema for PATCH /api/lists/:listId request body. Same field rules as create; at least one field required. */
 export const updateListBodySchema = z
   .object({
