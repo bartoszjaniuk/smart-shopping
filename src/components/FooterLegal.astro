@@ -1,0 +1,32 @@
+---
+export interface Props {
+  privacyUrl?: string;
+  termsUrl?: string;
+}
+
+const { privacyUrl = "/privacy", termsUrl = "/terms" } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="w-full border-t border-border bg-muted/60">
+  <div
+    class="mx-auto flex max-w-5xl flex-col gap-2 px-4 py-4 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between md:px-6"
+  >
+    <p class="order-2 md:order-1">© {year} SmartShopping. Wszelkie prawa zastrzeżone.</p>
+
+    <div class="order-1 flex items-center gap-4 md:order-2">
+      <a
+        href={privacyUrl}
+        class="hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        Polityka prywatności
+      </a>
+      <a
+        href={termsUrl}
+        class="hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        Regulamin
+      </a>
+    </div>
+  </div>
+</footer>

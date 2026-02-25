@@ -1,0 +1,40 @@
+---
+import ThemeToggle from "../components/ThemeToggle";
+
+export interface Props {
+  showLoginLink?: boolean;
+}
+
+const { showLoginLink = true } = Astro.props;
+---
+
+<header class="w-full border-b border-border bg-background/80 backdrop-blur">
+  <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 md:px-6">
+    <a
+      href="/"
+      class="flex items-center gap-2 text-base font-semibold tracking-tight text-foreground"
+      aria-label="SmartShopping - strona główna"
+    >
+      <span
+        class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary"
+      >
+        SS
+      </span>
+      <span class="text-lg">SmartShopping</span>
+    </a>
+
+    <div class="flex items-center gap-3">
+      <ThemeToggle client:load />
+      {
+        showLoginLink && (
+          <a
+            href="/auth/login"
+            class="text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            Zaloguj się
+          </a>
+        )
+      }
+    </div>
+  </div>
+</header>

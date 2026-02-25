@@ -1,7 +1,8 @@
-import { createSupabaseServerInstance } from "../db/supabase.client.ts";
 import { defineMiddleware } from "astro:middleware";
+import { createSupabaseServerInstance } from "../db/supabase.client.ts";
 
 const PUBLIC_PATHS = [
+  "/",
   "/auth/login",
   "/auth/register",
   "/auth/forgot-password",
@@ -14,18 +15,6 @@ const PUBLIC_PATHS = [
 ];
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
-  if (PUBLIC_PATHS.includes(url.pathname)) {
-    const supabase = createSupabaseServerInstance({ cookies, headers: request.headers });
-    locals.supabase = supabase;
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user) {
-      locals.user = { id: user.id, email: user.email ?? undefined };
-    }
-    return next();
-  }
-
   const supabase = createSupabaseServerInstance({ cookies, headers: request.headers });
   locals.supabase = supabase;
 
@@ -35,6 +24,15 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
 
   if (user) {
     locals.user = { id: user.id, email: user.email ?? undefined };
+
+    if (url.pathname === "/" || url.pathname.startsWith("/auth/")) {
+      return redirect("/lists");
+    }
+
+    return next();
+  }
+
+  if (PUBLIC_PATHS.includes(url.pathname)) {
     return next();
   }
 

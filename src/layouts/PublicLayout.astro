@@ -1,0 +1,22 @@
+---
+import HeaderPublic from "../components/HeaderPublic.astro";
+import FooterLegal from "../components/FooterLegal.astro";
+
+export interface Props {
+  showHeaderCta?: boolean;
+}
+
+const { showHeaderCta = true } = Astro.props;
+---
+
+<div class="flex min-h-screen flex-col bg-background text-foreground">
+  <HeaderPublic showLoginLink={showHeaderCta} />
+
+  <main class="flex-1">
+    <div class="mx-auto flex max-w-5xl flex-1 flex-col px-4 py-8 md:px-6 md:py-12">
+      <slot />
+    </div>
+  </main>
+
+  <FooterLegal />
+</div>

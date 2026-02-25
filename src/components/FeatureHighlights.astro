@@ -1,0 +1,42 @@
+---
+interface HighlightItem {
+  title: string;
+  description: string;
+}
+
+export interface Props {
+  items?: HighlightItem[];
+}
+
+const defaultItems: HighlightItem[] = [
+  {
+    title: "Automatyczne kategorie dzięki AI",
+    description: "Wpisujesz nazwę produktu, a SmartShopping sam przypisuje go do odpowiedniej kategorii.",
+  },
+  {
+    title: "Współdzielone listy w czasie rzeczywistym",
+    description: "Udostępniaj listy rodzinie lub znajomym i aktualizuj je wspólnie podczas zakupów.",
+  },
+  {
+    title: "Działa offline jako PWA",
+    description: "Dodawaj i odhaczaj produkty nawet bez zasięgu – zmiany zsynchronizują się później.",
+  },
+];
+
+const { items = defaultItems } = Astro.props;
+---
+
+<section class="mt-10 space-y-4 md:mt-12">
+  <h2 class="text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground">Dlaczego SmartShopping?</h2>
+
+  <div class="grid gap-4 md:grid-cols-3">
+    {
+      items.map((item) => (
+        <article class="rounded-xl border border-border bg-card/60 p-4 shadow-xs">
+          <h3 class="mb-1 text-sm font-semibold text-foreground">{item.title}</h3>
+          <p class="text-xs leading-relaxed text-muted-foreground">{item.description}</p>
+        </article>
+      ))
+    }
+  </div>
+</section>
