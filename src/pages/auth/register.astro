@@ -1,0 +1,17 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PublicLayout from "../../layouts/PublicLayout.astro";
+import AuthLayout from "../../layouts/AuthLayout.astro";
+import RegisterForm from "../../components/auth/RegisterForm.tsx";
+---
+
+<Layout title="Załóż konto – SmartShopping">
+  <PublicLayout showHeaderCta={false}>
+    <AuthLayout
+      title="Załóż konto"
+      description="Stwórz konto, aby korzystać z inteligentnych list zakupów i współdzielenia z bliskimi."
+    >
+      <RegisterForm client:load />
+    </AuthLayout>
+  </PublicLayout>
+</Layout>

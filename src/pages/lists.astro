@@ -1,0 +1,11 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AppShellLayout from "../layouts/AppShellLayout.astro";
+import ListsDashboardView from "../components/lists/ListsDashboardView.tsx";
+---
+
+<Layout title="Twoje listy – SmartShopping">
+  <AppShellLayout pageTitle="Twoje listy" activeRoute="/lists">
+    <ListsDashboardView client:load />
+  </AppShellLayout>
+</Layout>

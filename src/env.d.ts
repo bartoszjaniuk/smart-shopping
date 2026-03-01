@@ -17,6 +17,10 @@ interface ImportMetaEnv {
   readonly SUPABASE_KEY: string;
   /** Optional; used only server-side for POST /api/auth/delete-account (Admin API). */
   readonly SUPABASE_SERVICE_ROLE_KEY?: string;
+  /** URL projektu Supabase – używane w przeglądarce (Realtime, auth). Ta sama wartość co SUPABASE_URL. */
+  readonly PUBLIC_SUPABASE_URL: string;
+  /** Klucz anon – używany w przeglądarce. Ta sama wartość co SUPABASE_KEY (anon). */
+  readonly PUBLIC_SUPABASE_KEY: string;
 }
 
 interface ImportMeta {

@@ -1,5 +1,5 @@
 import type { AstroCookies } from "astro";
-import { createServerClient, type CookieOptionsWithName } from "@supabase/ssr";
+import { createBrowserClient, createServerClient, type CookieOptionsWithName } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types.ts";
 
@@ -30,6 +30,22 @@ export function createSupabaseAdminClient(): SupabaseClient<Database> {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set");
   }
   return createClient<Database>(import.meta.env.SUPABASE_URL, key);
+}
+
+/**
+ * Klient Supabase dla przeglądarki (anon key, sesja z ciasteczek).
+ * Używaj tylko w komponentach po stronie klienta. Sesja z ciasteczek pozwala
+ * Realtime i innym funkcjom wymagającym auth działać poprawnie.
+ */
+export function createSupabaseBrowserClient(): SupabaseClient<Database> {
+  const url = (import.meta.env as unknown as { PUBLIC_SUPABASE_URL: string }).PUBLIC_SUPABASE_URL as string | undefined;
+  const key = (import.meta.env as unknown as { PUBLIC_SUPABASE_KEY: string }).PUBLIC_SUPABASE_KEY as string | undefined;
+
+  if (!url || !key) {
+    throw new Error("PUBLIC_SUPABASE_URL and PUBLIC_SUPABASE_KEY must be set for browser client");
+  }
+
+  return createBrowserClient<Database>(url, key);
 }
 
 /**

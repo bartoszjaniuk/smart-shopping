@@ -1,0 +1,32 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AppShellLayout from "../../layouts/AppShellLayout.astro";
+import ListDetailView from "../../components/lists/ListDetailView.tsx";
+
+const { listId } = Astro.params;
+
+if (!listId) {
+  throw new Error("Parametr listId jest wymagany dla widoku szczegółów listy.");
+}
+
+// Sesja z serwera dla klienta Realtime (ciasteczka są httpOnly, więc klient jej nie czyta)
+let initialSession: { access_token: string; refresh_token: string } | null = null;
+const supabase = Astro.locals.supabase;
+if (supabase) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  if (session?.access_token && session?.refresh_token) {
+    initialSession = {
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+    };
+  }
+}
+---
+
+<Layout title="Szczegóły listy – SmartShopping">
+  <AppShellLayout pageTitle="Szczegóły listy" activeRoute="/lists" mobileBackHref="/lists">
+    <ListDetailView client:load listId={listId} initialSession={initialSession} />
+  </AppShellLayout>
+</Layout>

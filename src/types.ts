@@ -114,6 +114,103 @@ export const DEFAULT_LIST_COLOR = "#C3B1E1" as const;
 export type UpdateListCommand = Partial<Pick<ListRow, "name" | "color">>;
 
 // ---------------------------------------------------------------------------
+// Lists dashboard – DTOs and ViewModels (frontend)
+// ---------------------------------------------------------------------------
+
+/** GET /api/lists response wrapper used by the lists dashboard (pagination metadata + items). */
+export interface ListsListResponseDto {
+  data: ListSummaryDto[];
+  meta: PaginationMeta;
+}
+
+/** Filter applied to lists on the /lists dashboard. */
+export type ListsFilter = "all" | "owned" | "shared";
+
+/** Aggregated view model describing current state of the /lists dashboard. */
+export interface ListsDashboardViewModel {
+  lists: ListSummaryDto[];
+  filteredLists: ListSummaryDto[];
+  filter: ListsFilter;
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage?: string;
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  plan?: PlanType;
+  ownedListsCount: number;
+  hasReachedListLimit: boolean;
+}
+
+/** View model for a single list tile on the dashboard. */
+export interface ListCardViewModel {
+  id: string;
+  name: string;
+  color: string;
+  itemCountLabel: string;
+  roleLabel: string;
+  isDisabled: boolean;
+  isOwner?: boolean;
+}
+
+/** View model for the plan information banner rendered above the lists grid. */
+export interface PlanBannerViewModel {
+  plan: PlanType;
+  ownedListsCount: number;
+  maxLists: number | null;
+  limitReached: boolean;
+  description: string;
+}
+
+/** Local form model for creating a new list from the dashboard. Mirrors CreateListCommand shape. */
+export interface NewListFormValues {
+  name: string;
+  color?: string;
+}
+
+// ---------------------------------------------------------------------------
+// List form – shared view types (frontend)
+// ---------------------------------------------------------------------------
+
+/** Mode in which the reusable ListForm component operates. */
+export type ListFormMode = "create" | "edit";
+
+/** Local form values for creating or editing a list. */
+export interface ListFormValues {
+  name: string;
+  color?: string;
+}
+
+/** Aggregated view model describing ListForm UI state. */
+export interface ListFormViewModel {
+  values: ListFormValues;
+  isSubmitting: boolean;
+  isPristine: boolean;
+  serverError?: string;
+  plan?: PlanType;
+  hasReachedListLimit?: boolean;
+}
+
+/** Single pastel color option used in list color pickers. */
+export interface PastelColorOption {
+  value: string;
+  label: string;
+  isRecommended?: boolean;
+}
+
+/** Public props for the reusable ListForm React component. */
+export interface ListFormProps {
+  mode: ListFormMode;
+  initialValues?: ListFormValues;
+  plan?: PlanType;
+  /** Required in edit mode to call PATCH /api/lists/:listId. Ignored in create mode. */
+  listId?: string;
+  onSuccessCreate?(list: ListDto | ListDetailDto): void;
+  onSuccessUpdate?(list: ListDetailDto): void;
+  onCancel?(): void;
+}
+
+// ---------------------------------------------------------------------------
 // List members – DTO (from list_memberships + auth)
 // ---------------------------------------------------------------------------
 
@@ -150,6 +247,61 @@ export type UpdateListItemCommand = Partial<Pick<ListItemRow, "name" | "category
 /** POST /api/lists/:listId/items/clear-purchased response. */
 export interface ClearPurchasedResponseDto {
   deleted_count: number;
+}
+
+/** GET /api/lists/:listId/items response wrapper used by the list detail view. */
+export interface ListItemsListResponseDto {
+  data: ListItemDto[];
+  meta: PaginationMeta;
+}
+
+// ---------------------------------------------------------------------------
+// List detail view – frontend view models
+// ---------------------------------------------------------------------------
+
+/** Simplified item model used by ItemRow and related list detail components. */
+export interface ItemRowViewModel {
+  id: string;
+  name: string;
+  categoryCode: string;
+  isPurchased: boolean;
+  createdAt: string;
+  categoryName?: string;
+}
+
+/** Group of not-purchased items belonging to a single category in the list detail view. */
+export interface CategorySectionViewModel {
+  categoryId: string;
+  categoryCode: string;
+  categoryName: string;
+  items: ItemRowViewModel[];
+}
+
+/** Connection and synchronization status for Supabase Realtime in the list detail view. */
+export type RealtimeStatus = "connecting" | "online" | "offline" | "syncing" | "unavailable";
+
+/** Aggregated view model describing current state of the /lists/:listId detail view. */
+export interface ListDetailViewModel {
+  list: ListDetailDto | null;
+  items: ListItemDto[];
+  categorySections: CategorySectionViewModel[];
+  purchasedItems: ItemRowViewModel[];
+  isLoadingList: boolean;
+  isLoadingItems: boolean;
+  isMutating: boolean;
+  isError: boolean;
+  errorMessage?: string;
+  /** Ustawiane przez Realtime przy evencie list_deleted – UI pokazuje komunikat i „Wróć do list”. */
+  listDeleted?: boolean;
+  isOffline: boolean;
+  realtimeStatus: RealtimeStatus;
+  canEditItems: boolean;
+  canClearPurchased: boolean;
+}
+
+/** Local form model for adding a new item on the list detail view. */
+export interface AddItemFormValues {
+  name: string;
 }
 
 // ---------------------------------------------------------------------------

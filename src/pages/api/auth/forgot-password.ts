@@ -42,8 +42,15 @@ export const POST: APIRoute = async (context) => {
 
   if (error) {
     console.error("[POST /api/auth/forgot-password] resetPasswordForEmail error:", error.message);
+    return json(
+      {
+        error:
+          "Nie udało się wysłać e-maila resetującego hasło. Spróbuj ponownie później lub skontaktuj się z administratorem.",
+      },
+      500
+    );
   }
 
-  // Always return 200 with generic message to avoid revealing whether the account exists
+  // Zawsze zwracamy generyczny komunikat, aby nie ujawniać, czy konto istnieje
   return json({ message: "Jeśli konto istnieje, wysłaliśmy link do resetowania hasła na podany adres e-mail." }, 200);
 };

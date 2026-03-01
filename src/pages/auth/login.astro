@@ -1,0 +1,21 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PublicLayout from "../../layouts/PublicLayout.astro";
+import AuthLayout from "../../layouts/AuthLayout.astro";
+import LoginForm from "../../components/auth/LoginForm.tsx";
+
+const url = Astro.url;
+const rawRedirect = url.searchParams.get("redirect");
+const redirectUrl = rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : null;
+---
+
+<Layout title="Zaloguj się – SmartShopping">
+  <PublicLayout showHeaderCta={false}>
+    <AuthLayout
+      title="Zaloguj się"
+      description="Zaloguj się, aby zarządzać swoimi listami zakupów i współdzielić je z innymi."
+    >
+      <LoginForm client:load redirectUrl={redirectUrl ?? undefined} />
+    </AuthLayout>
+  </PublicLayout>
+</Layout>
