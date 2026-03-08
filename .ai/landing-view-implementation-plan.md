@@ -2,7 +2,7 @@
 
 ## 1. Przegląd
 
-Widok Landing (`/`) jest publicznym ekranem startowym aplikacji SmartShopping, którego celem jest krótkie przedstawienie wartości produktu (AI‑kategoryzacja, współdzielenie list, PWA) oraz szybkie przekierowanie użytkownika do logowania lub rejestracji. Zalogowani użytkownicy nie powinni w praktyce widzieć tego widoku – middleware aplikacji ma natychmiast przekierować ich na dashboard list (`/lists`) zgodnie z US‑002.
+Widok Landing (`/`) jest publicznym ekranem startowym aplikacji SmartShopping, którego celem jest krótkie przedstawienie wartości produktu (AI‑kategoryzacja, współdzielenie list, PWA) oraz szybkie przekierowanie użytkownika do logowania lub rejestracji. Landing jest dostępny zarówno dla niezalogowanych, jak i zalogowanych użytkowników – zalogowany może wejść na `/` i zobaczyć stronę główną (np. z linkiem do dashboardu `/lists`).
 
 Widok nie wykonuje bezpośrednich wywołań API biznesowego (listy, produkty itd.); jego rola to:
 
@@ -16,8 +16,8 @@ Widok nie wykonuje bezpośrednich wywołań API biznesowego (listy, produkty itd
 - **Ścieżka**: `/`
 - **Typ strony**: publiczna, bez wymaganego uwierzytelnienia.
 - **Zachowanie middleware**:
-  - Jeżeli użytkownik jest **zalogowany** (poprawny token Supabase/Auth w cookies) → middleware wykonuje redirect 302/307 na `/lists`.
-  - Jeżeli użytkownik jest **niezalogowany** → żądanie przechodzi do renderowania strony Landing.
+  - Ścieżka `/` jest dostępna dla **zalogowanych i niezalogowanych** – brak redirectu na `/lists` przy wejściu na landing.
+  - Ścieżki `/auth/*` (login, register, reset-password itd.): zalogowany użytkownik jest przekierowywany na `/lists`.
   - Jeżeli wystąpi błąd podczas weryfikacji sesji (np. wygasły token) → traktujemy użytkownika jak niezalogowanego, ale możemy wyczyścić niepoprawne cookies.
 - **Implementacja routingu**:
   - Strona Astro: `src/pages/index.astro` (LandingView).
@@ -218,7 +218,7 @@ Potencjalne lokalne stany:
   - `isAnimating` – jeżeli dodamy lekką animację hero (opcjonalne),
   - `hasLoaded` – do sekwencyjnego wejścia elementów (opcjonalne).
 
-Nie ma potrzeby wprowadzania customowych hooków do zarządzania stanem Landing. Jeżeli w przyszłości dodamy globalny hook autoryzacji (`useAuthSession`) i niektóre publiczne strony będą go potrzebowały, Landing wciąż pozostanie chroniony przede wszystkim przez middleware (redirect zalogowanych użytkowników).
+Nie ma potrzeby wprowadzania customowych hooków do zarządzania stanem Landing. Jeżeli w przyszłości dodamy globalny hook autoryzacji (`useAuthSession`), Landing może wyświetlać inne CTA dla zalogowanych (np. „Przejdź do list” zamiast „Zaloguj się”). Middleware nie przekierowuje z `/` – tylko z `/auth/*`.
 
 ## 7. Integracja API
 
@@ -227,9 +227,9 @@ Landing w MVP nie integruje się bezpośrednio z REST API opisanym w `.ai/api-pl
 - **Supabase Auth & middleware**:
   - Middleware (w `src/middleware/index.ts`) korzysta z Supabase server clienta i cookies, aby rozpoznać, czy użytkownik jest zalogowany.
   - Na podstawie stanu sesji decyduje:
-    - `GET /` + zalogowany → redirect do `/lists` (US‑002, US‑006).
-    - `GET /` + niezalogowany → przepuszczamy żądanie do strony Landing.
-  - Ten mechanizm zapewnia, że wymagania US‑002 („Po zalogowaniu redirect na dashboard”) są spełnione także dla powrotów na `/`.
+    - `GET /` – dostępne dla wszystkich (zalogowanych i niezalogowanych); landing renderowany w obu przypadkach.
+    - `GET /auth/*` + zalogowany → redirect do `/lists`.
+  - US‑002 („Po zalogowaniu redirect na dashboard”) jest spełniony przy logowaniu (redirect na `/lists`); wejście na `/` jako zalogowany nie wymusza redirectu – landing jest dostępny także dla zalogowanych.
 
 - **Brak bezpośrednich wywołań**:
   - Landing nie woła:
@@ -271,8 +271,9 @@ Wszystkie interakcje są proste i nie wymagają dodatkowego feedbacku poza stand
 Warunki wynikające z PRD, user stories i planu UI:
 
 - **Warunki po stronie middleware (autoryzacja)**:
-  - Jeżeli użytkownik jest **zalogowany**, nie powinien widzieć Landing – natychmiastowy redirect na `/lists`.
-  - Jeżeli użytkownik jest **niezalogowany**, ma dostęp do Landing i `/auth/*`, ale nie do `/lists` i innych tras aplikacji (chronione przez guardy/middleware).
+  - Ścieżka `/` (Landing) jest dostępna dla **zalogowanych i niezalogowanych** – zalogowany użytkownik może wejść na landing i go zobaczyć.
+  - Ścieżki `/auth/*`: zalogowany użytkownik jest przekierowywany na `/lists`.
+  - Niezalogowany użytkownik ma dostęp do `/`, `/auth/*`, ale nie do `/lists` i innych tras aplikacji (chronione przez guardy/middleware).
 
 - **Warunki po stronie komponentów**:
   - Brak klasycznej walidacji formularzowej na Landing.
@@ -283,7 +284,7 @@ Warunki wynikające z PRD, user stories i planu UI:
 - **Spójność z API**:
   - Choć Landing nie korzysta z API, musi być zgodny z przepływem opisanym w PRD:
     - Po zalogowaniu (US‑002) użytkownik trafia na `/lists`.
-    - Ponowna próba wejścia na `/auth/*` zalogowanym użytkownikiem powinna skutkować redirectem na `/lists` – analogiczna logika może dotyczyć wejścia na `/`.
+    - Ponowna próba wejścia na `/auth/*` zalogowanym użytkownikiem powinna skutkować redirectem na `/lists`. Wejście na `/` (landing) jest dozwolone także dla zalogowanych.
 
 ## 10. Obsługa błędów
 
@@ -330,14 +331,14 @@ Brak konieczności integracji z globalnym systemem toastów na tym widoku – La
 
 5. **Konfiguracja middleware dla `/`**
    - W `src/middleware/index.ts` (lub odpowiednim pliku) upewnij się, że:
-     - żądania na trasy publiczne (`/`, `/auth/*`) są dostępne dla niezalogowanych,
-     - żądanie na `/` i `/auth/*` dla użytkownika z aktywną sesją powoduje redirect na `/lists`.
+     - żądania na `/` są dostępne dla zalogowanych i niezalogowanych (brak redirectu z landingu),
+     - żądania na `/auth/*` dla użytkownika z aktywną sesją powodują redirect na `/lists`.
    - Wykorzystaj Supabase server client do sprawdzenia sesji zgodnie z wytycznymi w regułach projektu.
 
 6. **Testy na poziomie UX i przepływu użytkownika**
    - Zweryfikuj scenariusze:
      - Nowy użytkownik → `/` → „Załóż konto” → `/auth/register` → rejestracja → redirect na `/lists`.
-     - Powracający zalogowany użytkownik → wpisuje `/` → middleware przekierowuje na `/lists` (Landing niewidoczny).
+     - Zalogowany użytkownik → wpisuje `/` → widzi Landing (może np. przejść do `/lists` przez link/CTA).
      - Niezalogowany użytkownik → `/` → „Zaloguj się” → `/auth/login` → po poprawnym logowaniu redirect na `/lists`.
    - Sprawdź różne rozdzielczości (mobile/desktop), dostępność (kontrast, focus states) i poprawne działanie linków w stopce.
 

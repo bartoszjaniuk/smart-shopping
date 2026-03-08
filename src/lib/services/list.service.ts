@@ -377,7 +377,7 @@ export async function deleteList(supabase: SupabaseClient<Database>, userId: str
 
 /**
  * Returns list members (owner and editors) for a list the user can access.
- * Email is set to empty string (MVP; can be replaced with Auth Admin or DB later).
+ * Email is taken from public.profiles (synced from auth on signup and on auth email update).
  *
  * @param supabase - Supabase client from context.locals (user JWT)
  * @param userId - auth.uid()
@@ -403,13 +403,33 @@ export async function getListMembers(
     throw new Error("Failed to load list members");
   }
 
-  const members: ListMemberDto[] = (rows ?? []).map((row) => ({
+  if (!rows || rows.length === 0) {
+    return [] as ListMemberDto[];
+  }
+
+  const userIds = [...new Set(rows.map((r) => r.user_id))];
+  const { data: profileRows, error: profileError } = await supabase
+    .from("profiles")
+    .select("user_id, email")
+    .in("user_id", userIds);
+
+  if (profileError) {
+    console.error("[list.service] getListMembers profiles select error:", profileError.message);
+    throw new Error("Failed to load member profiles");
+  }
+
+  const emailByUserId = new Map<string, string>();
+  for (const p of profileRows ?? []) {
+    emailByUserId.set(p.user_id, p.email?.trim() ?? "");
+  }
+
+  const members: ListMemberDto[] = rows.map((row) => ({
     id: row.id,
     list_id: row.list_id,
     user_id: row.user_id,
     role: row.role,
     created_at: row.created_at,
-    email: "",
+    email: emailByUserId.get(row.user_id) ?? "",
   }));
 
   return members;

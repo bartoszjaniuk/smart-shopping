@@ -1,6 +1,6 @@
 /**
  * POST /api/auth/register – sign up with email and password.
- * Creates session (cookies) and profile row (plan: basic).
+ * Creates session (cookies). Profile row is created by DB trigger on auth.users insert.
  */
 
 import type { APIRoute } from "astro";
@@ -9,7 +9,6 @@ import { AuthApiError } from "@supabase/supabase-js";
 
 import { createSupabaseServerInstance } from "../../../db/supabase.client";
 import { parseRegisterBody } from "../../../lib/schemas/auth";
-import { createProfileForUser } from "../../../lib/services/auth.service";
 
 export const prerender = false;
 
@@ -54,13 +53,6 @@ export const POST: APIRoute = async (context) => {
 
   if (!data.user) {
     return json({ error: "Rejestracja nie powiodła się." }, 500);
-  }
-
-  try {
-    await createProfileForUser(supabase, data.user.id);
-  } catch (profileErr) {
-    console.error("[POST /api/auth/register] createProfile error:", profileErr);
-    return json({ error: "Konto utworzone, ale nie udało się utworzyć profilu. Skontaktuj się z supportem." }, 500);
   }
 
   return json({ user: { id: data.user.id, email: data.user.email ?? null } }, 201);

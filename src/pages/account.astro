@@ -1,0 +1,11 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AppShellLayout from "../layouts/AppShellLayout.astro";
+import AccountView from "../components/account/AccountView.tsx";
+---
+
+<Layout title="Konto – SmartShopping">
+  <AppShellLayout pageTitle="Konto" activeRoute="/account">
+    <AccountView client:load />
+  </AppShellLayout>
+</Layout>

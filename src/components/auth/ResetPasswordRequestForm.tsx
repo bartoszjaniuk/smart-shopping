@@ -1,4 +1,4 @@
-import type { FC, FormEvent } from "react";
+import type { FC } from "react";
 import { useCallback, useState } from "react";
 import ErrorSummary from "../ErrorSummary";
 
@@ -10,7 +10,7 @@ const ResetPasswordRequestForm: FC = () => {
   const [sentMessage, setSentMessage] = useState<string | null>(null);
 
   const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
+    async (event: React.BaseSyntheticEvent) => {
       event.preventDefault();
 
       if (isSubmitting) {

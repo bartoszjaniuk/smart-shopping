@@ -28,13 +28,18 @@ const PlanBanner: FC<PlanBannerProps> = ({ viewModel, onOpenPremiumModal, classN
 
   return (
     <section
-      className={"mb-4 rounded-lg border bg-card px-4 py-3 text-sm text-card-foreground shadow-sm " + (className ?? "")}
+      className={
+        "rounded-xl border border-input bg-card px-3 py-3 text-card-foreground shadow-sm md:mb-4 md:rounded-lg md:px-4 " +
+        (className ?? "")
+      }
       aria-label="Informacje o planie"
     >
       <div className="flex items-start gap-3">
         <div
-          className={`mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-            isBasic ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
+          className={`mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-8 md:w-8 ${
+            isBasic
+              ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+              : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
           }`}
           aria-hidden="true"
         >
@@ -61,36 +66,38 @@ const PlanBanner: FC<PlanBannerProps> = ({ viewModel, onOpenPremiumModal, classN
           </svg>
         </div>
 
-        <div className="flex-1 space-y-1">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Plan {plan === "basic" ? "Basic" : "Premium"}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground" aria-label={`Użycie: ${listsUsageLabel}`}>
               {listsUsageLabel}
-              {maxLists && ` • limit: ${maxLists === 1 ? "1 lista" : `${maxLists} list`}`}
             </p>
           </div>
 
-          <p className="text-sm leading-snug">{description}</p>
+          <p className="hidden text-sm leading-snug text-muted-foreground md:block">{description}</p>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground md:hidden">{description}</p>
 
           {limitReached && isBasic && (
-            <p className="text-xs font-medium text-amber-700">
-              Osiągnąłeś limit list w planie Basic. Aby utworzyć kolejne listy, rozważ przejście na plan Premium.
+            <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
+              Osiągnąłeś limit list. Zobacz plan Premium, aby tworzyć więcej.
             </p>
           )}
 
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="flex flex-col gap-2 pt-0.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2 sm:pt-0">
             <button
               type="button"
               onClick={handlePrimaryClick}
-              className="inline-flex items-center justify-center rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:min-h-0 md:min-w-0 md:py-1.5 md:text-xs"
+              aria-label={isBasic ? "Zobacz plan Premium" : "Zarządzaj planem"}
             >
               {isBasic ? "Zobacz plan Premium" : "Zarządzaj planem"}
             </button>
-
             {isBasic && !limitReached && (
-              <span className="text-xs text-muted-foreground">Zbliżasz się do limitu? Sprawdź, co daje Premium.</span>
+              <span className="hidden text-xs text-muted-foreground sm:inline">
+                Zbliżasz się do limitu? Sprawdź, co daje Premium.
+              </span>
             )}
           </div>
         </div>

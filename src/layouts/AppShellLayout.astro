@@ -1,4 +1,6 @@
 ---
+import ThemeToggle from "../components/ThemeToggle.tsx";
+
 export interface Props {
   /** Opcjonalny tytuł sekcji strony, wyświetlany nad treścią. */
   pageTitle?: string;
@@ -46,14 +48,16 @@ const isMobileNested = Boolean(mobileBackHref);
   <header class={`border-b bg-background/80 backdrop-blur ${isMobileNested ? "hidden md:block" : ""}`}>
     <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 md:px-6">
       <a
-        href="/lists"
-        class="flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground hover:text-foreground/80"
-        aria-label="Przejdź do dashboardu list"
+        href="/"
+        class="flex min-h-[44px] min-w-[44px] items-center gap-2 text-sm font-semibold tracking-tight text-foreground hover:text-foreground/80 sm:min-h-0 sm:min-w-0"
+        aria-label="SmartShopping – strona główna"
       >
-        <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <span
+          class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary sm:h-6 sm:w-6"
+        >
           SS
         </span>
-        <span class="hidden sm:inline">SmartShopping</span>
+        <span class="truncate max-w-[7rem] sm:max-w-none">SmartShopping</span>
       </a>
 
       <nav class="hidden items-center gap-4 text-sm md:flex" aria-label="Główna nawigacja">
@@ -110,6 +114,7 @@ const isMobileNested = Boolean(mobileBackHref);
           </svg>
           <span>Konto</span>
         </a>
+        <ThemeToggle client:load />
       </nav>
     </div>
   </header>
@@ -120,7 +125,11 @@ const isMobileNested = Boolean(mobileBackHref);
         isMobileNested ? "pb-4" : "pb-20 md:pb-6"
       }`}
     >
-      {pageTitle && !isMobileNested && <h1 class="mb-4 text-xl font-semibold tracking-tight">{pageTitle}</h1>}
+      {
+        pageTitle && !isMobileNested && (
+          <h1 class="mb-4 text-lg font-semibold tracking-tight text-foreground sm:text-xl">{pageTitle}</h1>
+        )
+      }
       {pageTitle && isMobileNested && <h1 class="sr-only">{pageTitle}</h1>}
       <slot />
     </div>
@@ -180,6 +189,7 @@ const isMobileNested = Boolean(mobileBackHref);
         </svg>
         <span>Konto</span>
       </a>
+      <ThemeToggle client:load />
     </div>
   </nav>
 </div>

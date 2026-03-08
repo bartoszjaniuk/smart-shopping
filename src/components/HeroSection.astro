@@ -3,11 +3,14 @@ interface HeroCopy {
   title: string;
   subtitle: string;
   primaryCtaLabel: string;
+  primaryCtaHref: string;
   secondaryCtaLabel: string;
+  secondaryCtaHref: string;
 }
 
 export interface Props {
-  copy?: HeroCopy;
+  copy?: Partial<HeroCopy> & Pick<HeroCopy, "title" | "subtitle">;
+  isLoggedIn?: boolean;
 }
 
 const defaultCopy: HeroCopy = {
@@ -15,10 +18,19 @@ const defaultCopy: HeroCopy = {
   subtitle:
     "Twórz i współdziel listy, które same kategoryzują produkty, działają offline i świetnie sprawdzają się na telefonie w sklepie.",
   primaryCtaLabel: "Zaloguj się",
+  primaryCtaHref: "/auth/login",
   secondaryCtaLabel: "Załóż konto",
+  secondaryCtaHref: "/auth/register",
 };
 
-const { copy = defaultCopy } = Astro.props;
+const { copy: copyProp, isLoggedIn = false } = Astro.props;
+const copy: HeroCopy = {
+  ...defaultCopy,
+  ...copyProp,
+  ...(isLoggedIn
+    ? { primaryCtaLabel: "Przejdź do list", primaryCtaHref: "/lists", secondaryCtaLabel: "", secondaryCtaHref: "" }
+    : {}),
+};
 ---
 
 <section class="grid gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-center">
@@ -33,18 +45,22 @@ const { copy = defaultCopy } = Astro.props;
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
       <a
-        href="/auth/login"
+        href={copy.primaryCtaHref}
         class="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {copy.primaryCtaLabel}
       </a>
 
-      <a
-        href="/auth/register"
-        class="inline-flex items-center justify-center rounded-md border border-input bg-background px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-      >
-        {copy.secondaryCtaLabel}
-      </a>
+      {
+        copy.secondaryCtaLabel && (
+          <a
+            href={copy.secondaryCtaHref}
+            class="inline-flex items-center justify-center rounded-md border border-input bg-background px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            {copy.secondaryCtaLabel}
+          </a>
+        )
+      }
     </div>
   </div>
 

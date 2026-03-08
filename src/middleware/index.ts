@@ -12,6 +12,7 @@ const PUBLIC_PATHS = [
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
   "/api/categories",
+  "/api/profile",
 ];
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
@@ -25,7 +26,8 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
   if (user) {
     locals.user = { id: user.id, email: user.email ?? undefined };
 
-    if (url.pathname === "/" || url.pathname.startsWith("/auth/")) {
+    // Zalogowany użytkownik: tylko ścieżki /auth/* przekierowujemy na /lists (landing "/" dostępny też dla zalogowanych)
+    if (url.pathname.startsWith("/auth/")) {
       return redirect("/lists");
     }
 

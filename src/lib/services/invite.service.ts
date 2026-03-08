@@ -12,7 +12,6 @@ import { BadRequestError, ForbiddenError, NotFoundError } from "./list.service";
 const ALPHANUMERIC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const CODE_LENGTH = 6;
 const MAX_GENERATION_ATTEMPTS = 3;
-const ACTIVE_CODE_WINDOW_MINUTES = 5;
 const DEFAULT_EXPIRES_HOURS = 24;
 const MAX_EDITORS_PER_LIST = 10;
 
@@ -46,7 +45,7 @@ export interface CreateInviteValidatedBody {
 
 /**
  * Creates an invite code for the list. Only the list owner may create invites.
- * Enforces: one active code per list within a 5-minute window; code globally unique.
+ * Enforces: at most one active code per list (any existing unused, non-expired code blocks creation).
  *
  * @param supabase - Supabase client from context.locals (user JWT)
  * @param userId - auth.uid()
@@ -55,7 +54,7 @@ export interface CreateInviteValidatedBody {
  * @returns InviteCodeDto (row + join_url)
  * @throws NotFoundError when list does not exist or user has no access
  * @throws ForbiddenError when user is not the owner
- * @throws BadRequestError when an active code already exists in the 5-min window
+ * @throws BadRequestError when an active code already exists for this list
  * @throws Error on DB/uniqueness failure after retries – map to 500 in route
  */
 export async function createInvite(
@@ -64,6 +63,7 @@ export async function createInvite(
   listId: string,
   body: CreateInviteValidatedBody
 ): Promise<InviteCodeDto> {
+  console.log("[invite.service] createInvite called", { userId, listId, body });
   const { data: listRow, error: fetchError } = await supabase
     .from("lists")
     .select("id, owner_id")
@@ -78,24 +78,28 @@ export async function createInvite(
   if (!listRow) throw new NotFoundError("Not Found");
   if (listRow.owner_id !== userId) throw new ForbiddenError("Forbidden");
 
-  const windowStart = new Date(Date.now() - ACTIVE_CODE_WINDOW_MINUTES * 60 * 1000).toISOString();
-
-  const { data: existingActive, error: activeError } = await supabase
+  const now = new Date().toISOString();
+  const { data: existingActiveList, error: activeError } = await supabase
     .from("invite_codes")
     .select("id")
     .eq("list_id", listId)
     .is("used_at", null)
-    .gt("expires_at", new Date().toISOString())
-    .gt("created_at", windowStart)
-    .maybeSingle();
+    .gt("expires_at", now)
+    .limit(1);
 
   if (activeError) {
     console.error("[invite.service] createInvite active-code check error:", activeError.message);
     throw new Error("Failed to check existing invite");
   }
 
-  if (existingActive) {
-    throw new BadRequestError("An active invite code already exists. Try again later.");
+  if (existingActiveList && existingActiveList.length > 0) {
+    console.warn("[invite.service] createInvite active invite exists", {
+      listId,
+      existingInviteId: existingActiveList[0]?.id,
+    });
+    throw new BadRequestError(
+      "Dla tej listy jest już aktywny kod zaproszenia. Udostępnij go lub poczekaj, aż wygaśnie, aby wygenerować nowy."
+    );
   }
 
   const expiresInHours = body.expires_in_hours ?? DEFAULT_EXPIRES_HOURS;
@@ -105,9 +109,11 @@ export async function createInvite(
   let lastError: Error | null = null;
   for (let attempt = 0; attempt < MAX_GENERATION_ATTEMPTS; attempt++) {
     const code = generateInviteCode();
+    console.log("[invite.service] createInvite generated code attempt", { attempt, code });
 
     const { data: existingCode } = await supabase.from("invite_codes").select("id").eq("code", code).maybeSingle();
     if (existingCode) {
+      console.warn("[invite.service] createInvite code collision", { code });
       lastError = new Error("Invite code collision");
       continue;
     }
@@ -179,6 +185,7 @@ export async function getInvites(
   listId: string,
   activeOnly: boolean
 ): Promise<InviteCodeSummaryDto[]> {
+  console.log("[invite.service] getInvites called", { userId, listId, activeOnly });
   const { data: listRow, error: fetchError } = await supabase
     .from("lists")
     .select("id, owner_id")
@@ -207,7 +214,9 @@ export async function getInvites(
     throw new Error("Failed to load invite codes");
   }
 
-  return (rows ?? []) as InviteCodeSummaryDto[];
+  const result = (rows ?? []) as InviteCodeSummaryDto[];
+  console.log("[invite.service] getInvites result", { count: result.length });
+  return result;
 }
 
 /**
@@ -225,6 +234,7 @@ export async function joinByInvite(
   userId: string,
   code: string
 ): Promise<JoinByInviteResponseDto> {
+  console.log("[invite.service] joinByInvite called", { userId, code });
   const { data: inviteRow, error: inviteError } = await supabase
     .from("invite_codes")
     .select("id, list_id, used_at, expires_at")
@@ -232,29 +242,43 @@ export async function joinByInvite(
     .maybeSingle();
 
   if (inviteError) {
-    console.error("[invite.service] joinByInvite fetch code error:", inviteError.message);
+    console.error("[invite.service] joinByInvite fetch code error:", inviteError.message, { code });
     throw new Error("Failed to validate invite code");
   }
 
   if (!inviteRow) {
+    console.warn("[invite.service] joinByInvite no invite found", { code });
     throw new BadRequestError("Invalid or expired invite code.");
   }
 
   if (inviteRow.used_at !== null) {
+    console.warn("[invite.service] joinByInvite invite already used", { code, inviteId: inviteRow.id });
     throw new BadRequestError("Invalid or expired invite code.");
   }
 
-  const now = new Date().toISOString();
-  if (inviteRow.expires_at <= now) {
+  const now = new Date();
+  const expiresAt = new Date(inviteRow.expires_at).getTime();
+  if (Number.isNaN(expiresAt) || expiresAt <= now.getTime()) {
+    console.warn("[invite.service] joinByInvite invite expired", {
+      code,
+      inviteId: inviteRow.id,
+      expires_at: inviteRow.expires_at,
+      now: now.toISOString(),
+    });
     throw new BadRequestError("Invalid or expired invite code.");
   }
 
   const listId = inviteRow.list_id;
 
-  const { data: listRow, error: listError } = await supabase.from("lists").select("id, name").eq("id", listId).single();
+  const { data: listRow, error: listError } = await supabase
+    .from("lists")
+    .select("id, name")
+    .eq("id", listId)
+    .limit(1)
+    .maybeSingle();
 
   if (listError || !listRow) {
-    console.error("[invite.service] joinByInvite fetch list error:", listError?.message);
+    console.error("[invite.service] joinByInvite fetch list error:", listError?.message, { listId });
     throw new Error("Failed to load list");
   }
 
@@ -265,11 +289,12 @@ export async function joinByInvite(
     .eq("role", "editor");
 
   if (countError) {
-    console.error("[invite.service] joinByInvite editor count error:", countError.message);
+    console.error("[invite.service] joinByInvite editor count error:", countError.message, { listId });
     throw new Error("Failed to check list members");
   }
 
   if ((editorCount ?? 0) >= MAX_EDITORS_PER_LIST) {
+    console.warn("[invite.service] joinByInvite editor limit reached", { listId, editorCount });
     throw new BadRequestError("This list has reached the maximum number of editors.");
   }
 
@@ -281,6 +306,7 @@ export async function joinByInvite(
     .maybeSingle();
 
   if (existingMembership) {
+    console.warn("[invite.service] joinByInvite already a member", { listId, userId });
     throw new BadRequestError("You are already a member of this list.");
   }
 
@@ -293,23 +319,30 @@ export async function joinByInvite(
   const { error: insertMemError } = await supabase.from("list_memberships").insert(membershipInsert);
 
   if (insertMemError) {
-    console.error("[invite.service] joinByInvite insert membership error:", insertMemError.message);
+    console.error("[invite.service] joinByInvite insert membership error:", insertMemError.message, {
+      listId,
+      userId,
+    });
     throw new Error("Failed to join list");
   }
 
   const { error: updateCodeError } = await supabase
     .from("invite_codes")
-    .update({ used_at: now })
+    .update({ used_at: now.toISOString() })
     .eq("id", inviteRow.id);
 
   if (updateCodeError) {
-    console.error("[invite.service] joinByInvite update used_at error:", updateCodeError.message);
+    console.error("[invite.service] joinByInvite update used_at error:", updateCodeError.message, {
+      inviteId: inviteRow.id,
+    });
     throw new Error("Failed to mark invite as used");
   }
 
-  return {
+  const result: JoinByInviteResponseDto = {
     list_id: listRow.id,
     list_name: listRow.name,
     role: "editor",
   };
+  console.log("[invite.service] joinByInvite success", { userId, code, listId: result.list_id });
+  return result;
 }

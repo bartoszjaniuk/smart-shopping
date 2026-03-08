@@ -1,4 +1,4 @@
-import type { FC, FormEvent } from "react";
+import type { FC } from "react";
 
 import ErrorSummary from "../ErrorSummary";
 import PastelColorPicker from "./PastelColorPicker";
@@ -27,7 +27,7 @@ const ListForm: FC<ListFormProps> = (props) => {
 
   const currentColor = watch("color");
 
-  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (event: React.BaseSyntheticEvent) => {
     event.preventDefault();
     void handleSubmit();
   };

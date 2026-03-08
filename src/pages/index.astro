@@ -3,14 +3,16 @@ import Layout from "../layouts/Layout.astro";
 import PublicLayout from "../layouts/PublicLayout.astro";
 import HeroSection from "../components/HeroSection.astro";
 import FeatureHighlights from "../components/FeatureHighlights.astro";
+
+const isLoggedIn = !!Astro.locals.user;
 ---
 
 <Layout
   title="SmartShopping – inteligentne listy zakupów"
   description="Twórz i wspólnie zarządzaj inteligentnymi listami zakupów z automatyczną kategoryzacją AI i wsparciem PWA."
 >
-  <PublicLayout>
-    <HeroSection />
+  <PublicLayout isLoggedIn={isLoggedIn}>
+    <HeroSection isLoggedIn={isLoggedIn} />
     <FeatureHighlights />
   </PublicLayout>
 </Layout>

@@ -4,13 +4,14 @@ import FooterLegal from "../components/FooterLegal.astro";
 
 export interface Props {
   showHeaderCta?: boolean;
+  isLoggedIn?: boolean;
 }
 
-const { showHeaderCta = true } = Astro.props;
+const { showHeaderCta = true, isLoggedIn = false } = Astro.props;
 ---
 
 <div class="flex min-h-screen flex-col bg-background text-foreground">
-  <HeaderPublic showLoginLink={showHeaderCta} />
+  <HeaderPublic showLoginLink={showHeaderCta} isLoggedIn={isLoggedIn} />
 
   <main class="flex-1">
     <div class="mx-auto flex max-w-5xl flex-1 flex-col px-4 py-8 md:px-6 md:py-12">

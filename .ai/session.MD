@@ -9,7 +9,7 @@
 ### Główne decyzje architektoniczne (UI)
 1. **Mapa tras**
    - Publiczne:
-     - `/` – prosty landing (hero + CTA „Zaloguj” / „Zarejestruj”), dla zalogowanych redirect na `/lists`.
+     - `/` – prosty landing (hero + CTA „Zaloguj” / „Zarejestruj”), dostępny także dla zalogowanych użytkowników (bez redirectu).
    - Auth (`/auth/*`, wspólny layout hero + formularz):
      - `/auth/login`
      - `/auth/register`

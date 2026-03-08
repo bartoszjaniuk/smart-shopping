@@ -62,6 +62,42 @@ export type ProfileDto = ProfileRow;
 export type UpdateProfileCommand = Partial<Pick<ProfileRow, "plan" | "preferred_locale">>;
 
 // ---------------------------------------------------------------------------
+// Account view – ViewModels and form values (frontend)
+// ---------------------------------------------------------------------------
+
+/** Aggregated view model for the /account view (profile, loading, error). */
+export interface AccountViewViewModel {
+  profile: ProfileDto | null;
+  email: string | null;
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage?: string;
+  activeSection?: "profile" | "plan" | "security";
+}
+
+/** View model for PlanCard (plan, limits, CTA label). Can be built inside the component. */
+export interface PlanCardViewModel {
+  plan: PlanType;
+  limitsDescription: string;
+  isPremium: boolean;
+  ctaLabel: string;
+  maxLists: number | null;
+  maxItemsPerList: number;
+}
+
+/** Local form values for ProfileForm (preferred_locale only). */
+export interface ProfileFormValues {
+  preferred_locale: string;
+}
+
+/** Local form values for ChangePasswordForm (confirm not sent to API). */
+export interface ChangePasswordFormValues {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+// ---------------------------------------------------------------------------
 // Categories – DTOs (from categories); name is localized in API layer
 // ---------------------------------------------------------------------------
 
@@ -223,6 +259,27 @@ export interface ListMemberDto extends ListMembershipRow {
 }
 
 // ---------------------------------------------------------------------------
+// Members view – ViewModel (frontend)
+// ---------------------------------------------------------------------------
+
+/**
+ * Aggregated view model for the /lists/:listId/members view.
+ * Used by MembersView and useMembersView hook for loading state, members, and actions.
+ */
+export interface MembersViewViewModel {
+  list: ListDetailDto | null;
+  members: ListMemberDto[];
+  currentUserId: string;
+  myRole: MembershipRole;
+  isLoadingList: boolean;
+  isLoadingMembers: boolean;
+  isError: boolean;
+  errorMessage?: string;
+  /** Set while DELETE member request is in progress (disable button for that user). */
+  isRemovingUserId: string | null;
+}
+
+// ---------------------------------------------------------------------------
 // List items – DTOs and Commands (from list_items)
 // ---------------------------------------------------------------------------
 
@@ -337,6 +394,26 @@ export interface JoinByInviteResponseDto {
   list_id: string;
   list_name: string;
   role: MembershipRole;
+}
+
+// ---------------------------------------------------------------------------
+// Join view – frontend view models
+// ---------------------------------------------------------------------------
+
+/** Local form model for the /join view (join by invite code). */
+export interface JoinViewFormValues {
+  code: string;
+}
+
+/** Aggregated view model describing current state of the /join view. */
+export interface JoinViewViewModel {
+  form: JoinViewFormValues;
+  isSubmitting: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  errorMessage?: string;
+  initialCode?: string;
+  redirectTo?: string;
 }
 
 // ---------------------------------------------------------------------------

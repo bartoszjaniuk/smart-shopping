@@ -1,4 +1,4 @@
-import type { FormEvent, FC } from "react";
+import type { FC } from "react";
 import { useCallback, useState } from "react";
 import ErrorSummary from "../ErrorSummary";
 
@@ -15,7 +15,7 @@ const LoginForm: FC<LoginFormProps> = ({ redirectUrl, message }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
+    async (event: React.BaseSyntheticEvent) => {
       event.preventDefault();
 
       if (isSubmitting) {

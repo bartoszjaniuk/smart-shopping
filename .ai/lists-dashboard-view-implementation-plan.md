@@ -487,7 +487,7 @@ Powinien odwzorowywać `CreateListCommand` z `src/types.ts` (bez pól serwerowyc
 1. **Przygotowanie pliku strony**:
    - Utwórz/uzupełnij plik `src/pages/lists.astro`, osadzając w nim `AppShellLayout` oraz główny komponent React `ListsDashboardView` (`client:load`).
 2. **Dodanie routingu i guardów**:
-   - Upewnij się, że middleware przekierowuje niezalogowanych użytkowników z `/lists` na `/auth/login` i zalogowanych z `/`/`/auth/*` na `/lists`.
+   - Upewnij się, że middleware przekierowuje niezalogowanych użytkowników z `/lists` na `/auth/login` i zalogowanych z `/auth/*` na `/lists`. Landing (`/`) jest dostępny także dla zalogowanych (bez redirectu).
 3. **Implementacja typów widokowych**:
    - Dodaj nowe typy: `ListsListResponseDto`, `ListsFilter`, `ListsDashboardViewModel`, `ListCardViewModel`, `PlanBannerViewModel`, `NewListFormValues` (np. w pliku `src/types.ts` lub osobnym module typów dla UI).
 4. **Implementacja hooków do danych**:

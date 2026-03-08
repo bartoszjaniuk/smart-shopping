@@ -22,7 +22,7 @@ Całość oparta o:
 ### 2.1. Widok: Landing
 
 - **Ścieżka widoku**: `/`
-- **Główny cel**: Krótkie przedstawienie aplikacji, przekierowanie użytkownika do logowania lub rejestracji; dla zalogowanych szybki redirect na `/lists`.
+- **Główny cel**: Krótkie przedstawienie aplikacji, przekierowanie użytkownika do logowania lub rejestracji. Landing jest dostępny także dla zalogowanych użytkowników (bez redirectu).
 - **Kluczowe informacje do wyświetlenia**:
   - Krótki opis „Co robi SmartShopping” (AI kategoryzacja, współdzielenie list, PWA).
   - CTA: „Zaloguj się” / „Załóż konto”.
@@ -32,7 +32,7 @@ Całość oparta o:
 - **UX, dostępność i względy bezpieczeństwa**:
   - Minimalny, lekki widok – szybkie ładowanie, brak elementów rozpraszających.
   - Link do polityki prywatności / regulaminu w stopce.
-  - Zalogowany użytkownik jest natychmiast przekierowywany na `/lists` (guard w middleware), aby uniknąć zbędnych kroków (US‑002).
+  - Zalogowany użytkownik może wejść na landing i zobaczyć stronę główną (np. z linkiem do dashboardu `/lists`); tylko ścieżki `/auth/*` przekierowują zalogowanych na `/lists` (US‑002).
 
 ### 2.2. Widok: Logowanie
 
@@ -130,23 +130,7 @@ Całość oparta o:
   - Responsywna siatka (1 kolumna na very small, 2+ kolumny na tablet/desktop).
   - Zabezpieczenie: brak danych w UI bez autoryzacji (guard 401/403 → redirect do `/auth/login`).
 
-### 2.8. Widok: Tworzenie / Edycja listy (modal/strona)
-
-- **Ścieżki widoku**:
-  - Tworzenie: modal z `/lists` lub pełny widok `/lists/new` (opcjonalnie).
-  - Edycja: `/lists/:listId/settings`.
-- **Główny cel**: Utworzenie nowej listy lub zmiana jej nazwy i koloru (US‑007, US‑008).
-- **Kluczowe informacje do wyświetlenia**:
-  - Formularz: nazwa listy, wybór koloru z predefiniowanej palety pastelowych kolorów.
-  - Informacja o limitach planu przy tworzeniu (Basic – 1 lista).
-- **Kluczowe komponenty widoku**:
-  - `ListForm` (re-użyty dla tworzenia i edycji).
-  - `PastelColorPicker`.
-  - `SettingsLayout` (dla `/lists/:listId/settings`, z breadcrumbem „← Powrót do listy”).
-- **UX, dostępność i względy bezpieczeństwa**:
-  - Natychmiastowy feedback walidacyjny (puste pole nazwy, przekroczenie długości).
-  - Próba utworzenia drugiej listy w planie Basic → toast + możliwość przejścia do fake door Premium (US‑023, US‑024).
-  - Tylko Owner widzi ustawienia listy i przycisk „Usuń listę”.
+ę - Tylko Owner widzi ustawienia listy i przycisk „Usuń listę”.
 
 ### 2.9. Widok: Usunięcie listy
 
@@ -396,7 +380,7 @@ Całość oparta o:
 
 - Middleware / guards:
   - Próba wejścia na trasę aplikacji bez zalogowania → redirect do `/auth/login`.
-  - Próba wejścia na `/auth/*` zalogowanym użytkownikiem → redirect do `/lists`.
+  - Próba wejścia na `/auth/*` zalogowanym użytkownikiem → redirect do `/lists`. Wejście na `/` (landing) jest dozwolone także dla zalogowanych.
 - Wewnętrzne ekrany błędów:
   - 401/403 w trakcie ładowania danych na `/lists/:listId` → `ErrorState` w layoucie listy, przycisk „Wróć do list”.
   - 404 (lista nie znaleziona) → podobnie, z komunikatem „Ta lista nie istnieje”.

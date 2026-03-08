@@ -6,10 +6,19 @@ export interface Props {
 }
 
 const { title = "SmartShopping", description } = Astro.props;
+
+const themeInitScript = `
+(function() {
+  var stored = localStorage.getItem("theme");
+  var dark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.classList.toggle("dark", dark);
+  if (stored) document.documentElement.dataset.theme = stored;
+})();
+`;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="pl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -18,6 +27,7 @@ const { title = "SmartShopping", description } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
+    <script is:inline set:html={themeInitScript} />
   </head>
   <body class="min-h-screen">
     <slot />

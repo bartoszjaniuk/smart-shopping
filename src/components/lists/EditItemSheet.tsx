@@ -1,4 +1,4 @@
-import type { FC, FormEvent } from "react";
+import type { FC } from "react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,7 +44,7 @@ const EditItemSheet: FC<EditItemSheetProps> = ({ open, initialName, onSave, onCl
     return null;
   }
 
-  const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (event: React.BaseSyntheticEvent) => {
     event.preventDefault();
     void handleSubmit(async (values) => {
       await onSave(values.name.trim());

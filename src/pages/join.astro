@@ -1,0 +1,24 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AppShellLayout from "../layouts/AppShellLayout.astro";
+import JoinByCodeForm from "../components/join/JoinByCodeForm.tsx";
+
+const initialCode = Astro.url.searchParams.get("code") ?? undefined;
+---
+
+<Layout title="Dołącz do listy kodem – SmartShopping">
+  <AppShellLayout pageTitle="Dołącz do listy kodem" activeRoute="/lists" mobileBackHref="/lists">
+    <section class="mx-auto flex w-full max-w-md flex-col gap-4 py-4">
+      <header class="space-y-1">
+        <p class="text-xs font-medium uppercase tracking-[0.2em] text-primary/80">Wspólna lista zakupów</p>
+        <h2 class="text-xl font-semibold tracking-tight">Dołącz do listy kodem</h2>
+        <p class="text-sm text-muted-foreground">
+          Wpisz 6‑znakowy kod zaproszenia, który otrzymałeś od właściciela listy. Po dołączeniu zobaczysz wszystkie
+          produkty i będziesz mógł je wspólnie edytować.
+        </p>
+      </header>
+
+      <JoinByCodeForm client:load initialCode={initialCode} />
+    </section>
+  </AppShellLayout>
+</Layout>

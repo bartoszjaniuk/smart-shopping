@@ -7,14 +7,20 @@ import type { SupabaseClient } from "../../db/supabase.client";
 import type { Database } from "../../db/database.types";
 
 /**
- * Creates a profile row for the given user (plan: basic).
- * Called from the register endpoint after signUp; could alternatively be done
- * via a database trigger on auth.user_created.
+ * Creates a profile row for the given user (plan: basic, email from signup).
+ * Not used in normal flows: profile is created by DB trigger on auth.users insert.
+ * Use only for backfills or admin tooling; caller must use a client that can INSERT
+ * into profiles (e.g. service role), since RLS has no INSERT policy for authenticated.
  */
-export async function createProfileForUser(supabase: SupabaseClient<Database>, userId: string): Promise<void> {
+export async function createProfileForUser(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  email: string | null = null
+): Promise<void> {
   const { error } = await supabase.from("profiles").insert({
     user_id: userId,
     plan: "basic",
+    email: email ?? null,
   });
 
   if (error) {

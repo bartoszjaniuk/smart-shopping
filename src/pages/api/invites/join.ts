@@ -52,6 +52,7 @@ async function getAuthUser(context: import("astro").APIContext): Promise<AuthRes
  * Returns 200 with JoinByInviteResponseDto, or 400/401/500.
  */
 export const POST: APIRoute = async (context) => {
+  console.log("[POST /api/invites/join] Request received");
   const auth = await getAuthUser(context);
   if (!auth.ok) return auth.response;
 
@@ -61,6 +62,7 @@ export const POST: APIRoute = async (context) => {
   try {
     const raw = await context.request.json();
     body = parseJoinByInviteBody(raw);
+    console.log("[POST /api/invites/join] Parsed body", { code: body.code, userId: user.id });
   } catch (err) {
     if (err instanceof ZodError) {
       const message = err.errors.length > 0 ? err.errors[0].message : "Invalid request body";
@@ -71,9 +73,19 @@ export const POST: APIRoute = async (context) => {
 
   try {
     const result = await joinByInvite(supabase, user.id, body.code);
+    console.log("[POST /api/invites/join] joinByInvite success", {
+      userId: user.id,
+      code: body.code,
+      listId: result.list_id,
+    });
     return json(result, 200);
   } catch (err) {
     if (err instanceof BadRequestError) {
+      console.warn("[POST /api/invites/join] BadRequestError", {
+        message: err.message,
+        userId: user.id,
+        code: body.code,
+      });
       return json({ error: err.message }, 400);
     }
     console.error("[POST /api/invites/join] error:", err);

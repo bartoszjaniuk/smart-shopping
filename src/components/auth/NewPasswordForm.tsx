@@ -1,4 +1,4 @@
-import type { FC, FormEvent } from "react";
+import type { FC } from "react";
 import { useCallback, useEffect, useState } from "react";
 import ErrorSummary from "../ErrorSummary";
 import { createSupabaseBrowserClient } from "../../db/supabase.client";
@@ -70,7 +70,7 @@ const NewPasswordForm: FC = () => {
   }, [supabase]);
 
   const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
+    async (event: React.BaseSyntheticEvent) => {
       event.preventDefault();
 
       if (isSubmitting || isLoading || tokenError || !supabase) {

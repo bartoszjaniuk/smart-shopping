@@ -219,6 +219,7 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
 
     const triggerRefetch = () => {
       if (mounted) {
+        console.log("[Realtime] broadcast event received, refetching list/items");
         setRealtimeStatus((prev) => (prev === "online" ? "syncing" : prev));
         setReloadToken((t) => t + 1);
       }
@@ -226,6 +227,7 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
 
     const setStatusFromChannel = (channelName: string, status: string) => {
       if (!mounted) return;
+      console.log("[Realtime] channel status", { channel: channelName, status });
       if (status === "SUBSCRIBED") {
         setRealtimeStatus((prev) => (prev === "connecting" ? "online" : prev));
       } else if (status === "CHANNEL_ERROR" || status === "CLOSED" || status === "TIMED_OUT") {
@@ -253,15 +255,20 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
         }
         if (tokenForRealtime) {
           await supabase.realtime.setAuth(tokenForRealtime);
+          console.log("[Realtime] setAuth called with token");
         } else {
           await supabase.realtime.setAuth();
+          console.log("[Realtime] setAuth called without token (anonymous)");
         }
 
         const usePrivateChannel = true;
-
         const topicList = `list:${listId}`;
         const topicItems = `list:${listId}:items`;
         const topicMembers = `list:${listId}:members`;
+        console.log("[Realtime] subscribing to private channels", {
+          listId,
+          topics: [topicList, topicItems, topicMembers],
+        });
 
         const channelList = supabase.channel(topicList, {
           config: { broadcast: { self: false }, private: usePrivateChannel },
@@ -310,7 +317,8 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
           .on("broadcast", { event: "DELETE" }, () => triggerRefetch());
         channelMembers.subscribe((status) => setStatusFromChannel(topicMembers, status));
         channels.push(channelMembers);
-      } catch {
+      } catch (err) {
+        console.error("[Realtime] setup failed", err);
         if (mounted) setRealtimeStatus("unavailable");
       }
     })();
@@ -319,6 +327,7 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
       mounted = false;
       const client = supabase;
       if (client && channels.length > 0) {
+        console.log("[Realtime] cleaning up channels", { listId, count: channels.length });
         channels.forEach((ch) => client.removeChannel(ch));
       }
     };

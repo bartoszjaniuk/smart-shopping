@@ -245,6 +245,7 @@ export interface Database {
       profiles: {
         Row: {
           created_at: string;
+          email: string | null;
           plan: Database["public"]["Enums"]["plan_type"];
           preferred_locale: string | null;
           updated_at: string;
@@ -252,6 +253,7 @@ export interface Database {
         };
         Insert: {
           created_at?: string;
+          email?: string | null;
           plan?: Database["public"]["Enums"]["plan_type"];
           preferred_locale?: string | null;
           updated_at?: string;
@@ -259,6 +261,7 @@ export interface Database {
         };
         Update: {
           created_at?: string;
+          email?: string | null;
           plan?: Database["public"]["Enums"]["plan_type"];
           preferred_locale?: string | null;
           updated_at?: string;

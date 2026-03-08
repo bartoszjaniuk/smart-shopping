@@ -20,7 +20,7 @@ Wspólny cel: umożliwienie rejestracji (US-001), logowania (US-002), odzyskania
 | Wysłanie linku resetującego     | `/auth/forgot-password` | W ui-plan.md używana jest nazwa „reset-password” dla tego kroku; w kodzie i API używane jest `/auth/forgot-password` oraz `POST /api/auth/forgot-password`. |
 | Ustawienie nowego hasła z linku | `/auth/reset-password`  | Strona otwierana z linku z e-maila; token w fragmencie URL (`#access_token=...&type=recovery`).                                                             |
 
-Ścieżki `/auth/*` są w `PUBLIC_PATHS` w middleware; zalogowany użytkownik jest przekierowywany na `/lists`.
+Ścieżki `/auth/*` są w `PUBLIC_PATHS` w middleware; zalogowany użytkownik jest przekierowywany z tych ścieżek na `/lists`. Landing (`/`) jest dostępny także dla zalogowanych (bez redirectu).
 
 ## 3. Struktura komponentów
 
