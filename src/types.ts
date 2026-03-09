@@ -113,6 +113,17 @@ export interface CategoryDto {
   sort_order: CategoryRow["sort_order"];
 }
 
+/**
+ * Aggregated view model for the /categories dictionary view.
+ * Used by CategoriesView and useCategoriesView hook for loading state and error handling.
+ */
+export interface CategoriesViewViewModel {
+  categories: CategoryDto[];
+  isLoading: boolean;
+  isError: boolean;
+  errorMessage?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Lists – DTOs and Commands (from lists)
 // ---------------------------------------------------------------------------

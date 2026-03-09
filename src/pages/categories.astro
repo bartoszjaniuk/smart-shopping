@@ -1,0 +1,11 @@
+---
+import Layout from "../layouts/Layout.astro";
+import AppShellLayout from "../layouts/AppShellLayout.astro";
+import CategoriesView from "../components/categories/CategoriesView.tsx";
+---
+
+<Layout title="Kategorie – SmartShopping">
+  <AppShellLayout pageTitle="Kategorie" activeRoute="/categories">
+    <CategoriesView client:load />
+  </AppShellLayout>
+</Layout>

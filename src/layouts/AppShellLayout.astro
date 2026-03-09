@@ -91,6 +91,33 @@ const isMobileNested = Boolean(mobileBackHref);
         </a>
 
         <a
+          href="/categories"
+          aria-current={activeRoute === "/categories" ? "page" : undefined}
+          class={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+            activeRoute === "/categories"
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          }`}
+        >
+          <svg
+            aria-hidden="true"
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Kategorie</span>
+        </a>
+
+        <a
           href="/account"
           aria-current={activeRoute === "/account" ? "page" : undefined}
           class={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
@@ -166,7 +193,30 @@ const isMobileNested = Boolean(mobileBackHref);
         </svg>
         <span>Listy</span>
       </a>
-
+      <a
+        href="/categories"
+        aria-current={activeRoute === "/categories" ? "page" : undefined}
+        class={`flex flex-col items-center gap-0.5 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+          activeRoute === "/categories" ? "text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+        }`}
+      >
+        <svg
+          aria-hidden="true"
+          class="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Kategorie</span>
+      </a>
       <a
         href="/account"
         aria-current={activeRoute === "/account" ? "page" : undefined}
