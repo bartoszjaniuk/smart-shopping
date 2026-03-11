@@ -20,6 +20,9 @@ jobs:
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
       - name: Build application
         uses: ./.github/actions/node-setup-and-build
 

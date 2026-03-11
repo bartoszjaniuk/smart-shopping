@@ -19,6 +19,9 @@ jobs:
       PUBLIC_SUPABASE_KEY: ${{ secrets.PUBLIC_SUPABASE_KEY }}
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
       - name: Build and test
         uses: ./.github/actions/node-setup-and-build
 
