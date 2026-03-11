@@ -97,7 +97,9 @@ export default defineConfig({
     }),
   ],
   server: { port: 3000 },
+
   vite: {
+    envPrefix: ["VITE_", "PUBLIC_", "SUPABASE_", "OPENROUTER_"],
     plugins: [tailwindcss()],
     resolve: {
       alias: { "react-dom/server": "react-dom/server.edge" },
