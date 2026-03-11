@@ -1,5 +1,7 @@
 ---
 import "../styles/global.css";
+import { PwaRegister } from "../components/PwaRegister";
+
 export interface Props {
   title?: string;
   description?: string;
@@ -24,12 +26,16 @@ const themeInitScript = `
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SmartShopping" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <script is:inline set:html={themeInitScript} />
   </head>
   <body class="min-h-screen">
+    <PwaRegister client:load />
     <slot />
   </body>
 </html>
