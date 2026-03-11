@@ -102,8 +102,8 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  // adapter: cloudflare(),
-  adapter: node({
-    mode: "standalone",
-  }),
+  adapter: cloudflare(),
+  // adapter: node({
+  //   mode: "standalone",
+  // }),
 });
