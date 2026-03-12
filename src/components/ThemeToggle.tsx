@@ -40,17 +40,17 @@ export default function ThemeToggle() {
       aria-label={isDark ? "Przełącz na jasny motyw" : "Przełącz na ciemny motyw"}
       aria-pressed={isDark}
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-input bg-background text-muted-foreground shadow-sm transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <span className="relative inline-flex h-4 w-4 items-center justify-center">
         <span className={`transition-opacity duration-150 ${isDark ? "opacity-0" : "opacity-100"}`}>
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
-            className="h-4 w-4"
+            className="h-5 w-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
@@ -62,10 +62,10 @@ export default function ThemeToggle() {
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
-            className="h-4 w-4"
+            className="h-5 w-5"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
+            strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
           >

@@ -38,7 +38,10 @@ const isMobileNested = Boolean(mobileBackHref);
               <path d="m15 18-6-6 6-6" />
             </svg>
           </a>
-          {pageTitle && <h1 class="truncate text-base font-semibold tracking-tight">{pageTitle}</h1>}
+          {pageTitle && <h1 class="flex-1 truncate text-base font-semibold tracking-tight">{pageTitle}</h1>}
+          <div class="flex items-center justify-end">
+            <ThemeToggle client:load />
+          </div>
         </div>
       </header>
     )
@@ -60,89 +63,94 @@ const isMobileNested = Boolean(mobileBackHref);
         <span class="truncate max-w-28 sm:max-w-none">SmartShopping</span>
       </a>
 
-      <nav class="hidden items-center gap-4 text-sm md:flex" aria-label="Główna nawigacja">
-        <a
-          href="/lists"
-          aria-current={activeRoute === "/lists" ? "page" : undefined}
-          class={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            activeRoute === "/lists"
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
-          }`}
-        >
-          <svg
-            aria-hidden="true"
-            class="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+      <div class="flex items-center gap-4">
+        <div class="md:hidden">
+          <ThemeToggle client:load />
+        </div>
+        <nav class="hidden items-center gap-4 text-sm md:flex" aria-label="Główna nawigacja">
+          <a
+            href="/lists"
+            aria-current={activeRoute === "/lists" ? "page" : undefined}
+            class={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              activeRoute === "/lists"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
           >
-            <path d="M8 6h13"></path>
-            <path d="M8 12h13"></path>
-            <path d="M8 18h13"></path>
-            <path d="M3 6h.01"></path>
-            <path d="M3 12h.01"></path>
-            <path d="M3 18h.01"></path>
-          </svg>
-          <span>Listy</span>
-        </a>
+            <svg
+              aria-hidden="true"
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M8 6h13"></path>
+              <path d="M8 12h13"></path>
+              <path d="M8 18h13"></path>
+              <path d="M3 6h.01"></path>
+              <path d="M3 12h.01"></path>
+              <path d="M3 18h.01"></path>
+            </svg>
+            <span>Listy</span>
+          </a>
 
-        <a
-          href="/categories"
-          aria-current={activeRoute === "/categories" ? "page" : undefined}
-          class={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            activeRoute === "/categories"
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
-          }`}
-        >
-          <svg
-            aria-hidden="true"
-            class="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          <a
+            href="/categories"
+            aria-current={activeRoute === "/categories" ? "page" : undefined}
+            class={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              activeRoute === "/categories"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
           >
-            <rect x="3" y="3" width="7" height="7"></rect>
-            <rect x="14" y="3" width="7" height="7"></rect>
-            <rect x="3" y="14" width="7" height="7"></rect>
-            <rect x="14" y="14" width="7" height="7"></rect>
-          </svg>
-          <span>Kategorie</span>
-        </a>
+            <svg
+              aria-hidden="true"
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Kategorie</span>
+          </a>
 
-        <a
-          href="/account"
-          aria-current={activeRoute === "/account" ? "page" : undefined}
-          class={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-            activeRoute === "/account"
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
-          }`}
-        >
-          <svg
-            aria-hidden="true"
-            class="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          <a
+            href="/account"
+            aria-current={activeRoute === "/account" ? "page" : undefined}
+            class={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              activeRoute === "/account"
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
           >
-            <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"></path>
-            <path d="M4 20a8 8 0 0 1 16 0"></path>
-          </svg>
-          <span>Konto</span>
-        </a>
-        <ThemeToggle client:load />
-      </nav>
+            <svg
+              aria-hidden="true"
+              class="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z"></path>
+              <path d="M4 20a8 8 0 0 1 16 0"></path>
+            </svg>
+            <span>Konto</span>
+          </a>
+          <ThemeToggle client:load />
+        </nav>
+      </div>
     </div>
   </header>
 
@@ -239,7 +247,6 @@ const isMobileNested = Boolean(mobileBackHref);
         </svg>
         <span>Konto</span>
       </a>
-      <ThemeToggle client:load />
     </div>
   </nav>
 </div>

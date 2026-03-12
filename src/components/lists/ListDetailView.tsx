@@ -32,7 +32,7 @@ const ListDetailView: FC<ListDetailViewProps> = ({ listId, initialSession }) => 
     }
   };
 
-  if (viewModel.isLoadingList || viewModel.isLoadingItems) {
+  if ((!viewModel.list && viewModel.isLoadingList) || (!viewModel.list && viewModel.isLoadingItems)) {
     return (
       <div className="flex flex-1 flex-col gap-4 py-8">
         <div className="h-4 w-40 animate-pulse rounded-full bg-muted" />
