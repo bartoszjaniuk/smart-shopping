@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 type Theme = "light" | "dark";
 
 const STORAGE_KEY = "theme";
+const THEME_CHANGE_EVENT = "theme-change";
 
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") {
@@ -29,8 +30,34 @@ export default function ThemeToggle() {
 
   useEffect(() => {
     applyTheme(theme);
-    window.localStorage.setItem(STORAGE_KEY, theme);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(STORAGE_KEY, theme);
+    }
   }, [theme]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Sync initial state with current DOM/theme set by Layout script
+    const root = document.documentElement;
+    const datasetTheme = root.dataset.theme as Theme | undefined;
+    const isDarkClass = root.classList.contains("dark");
+    const resolvedTheme: Theme = datasetTheme ?? (isDarkClass ? "dark" : "light");
+    if (resolvedTheme !== theme) {
+      setTheme(resolvedTheme);
+    }
+
+    const handleThemeChange = (event: Event) => {
+      const custom = event as CustomEvent<{ theme?: Theme }>;
+      if (!custom.detail?.theme) return;
+      setTheme(custom.detail.theme);
+    };
+
+    window.addEventListener(THEME_CHANGE_EVENT, handleThemeChange as EventListener);
+    return () => {
+      window.removeEventListener(THEME_CHANGE_EVENT, handleThemeChange as EventListener);
+    };
+  }, []);
 
   const isDark = theme === "dark";
 
@@ -39,7 +66,17 @@ export default function ThemeToggle() {
       type="button"
       aria-label={isDark ? "Przełącz na jasny motyw" : "Przełącz na ciemny motyw"}
       aria-pressed={isDark}
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={() => {
+        const nextTheme: Theme = isDark ? "light" : "dark";
+        setTheme(nextTheme);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent(THEME_CHANGE_EVENT, {
+              detail: { theme: nextTheme },
+            })
+          );
+        }
+      }}
       className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <span className="relative inline-flex h-4 w-4 items-center justify-center">

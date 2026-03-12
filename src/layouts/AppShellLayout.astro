@@ -64,8 +64,8 @@ const isMobileNested = Boolean(mobileBackHref);
       </a>
 
       <div class="flex items-center gap-4">
-        <div class="md:hidden">
-          <ThemeToggle client:load />
+        <div class="md:hidden flex h-8 w-8 items-center justify-center">
+          <ThemeToggle client:only="react" />
         </div>
         <nav class="hidden items-center gap-4 text-sm md:flex" aria-label="Główna nawigacja">
           <a
@@ -148,7 +148,9 @@ const isMobileNested = Boolean(mobileBackHref);
             </svg>
             <span>Konto</span>
           </a>
-          <ThemeToggle client:load />
+          <div class="flex h-8 w-8 items-center justify-center">
+            <ThemeToggle client:only="react" />
+          </div>
         </nav>
       </div>
     </div>

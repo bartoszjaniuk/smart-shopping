@@ -84,8 +84,7 @@ export async function createInvite(
     .select("id")
     .eq("list_id", listId)
     .is("used_at", null)
-    .gt("expires_at", now)
-    .limit(1);
+    .gt("expires_at", now);
 
   if (activeError) {
     console.error("[invite.service] createInvite active-code check error:", activeError.message);
@@ -93,13 +92,22 @@ export async function createInvite(
   }
 
   if (existingActiveList && existingActiveList.length > 0) {
-    console.warn("[invite.service] createInvite active invite exists", {
-      listId,
-      existingInviteId: existingActiveList[0]?.id,
-    });
-    throw new BadRequestError(
-      "Dla tej listy jest już aktywny kod zaproszenia. Udostępnij go lub poczekaj, aż wygaśnie, aby wygenerować nowy."
-    );
+    const ids = existingActiveList.map((row) => row.id).filter(Boolean);
+    if (ids.length > 0) {
+      const { error: deactivateError } = await supabase.from("invite_codes").delete().in("id", ids);
+
+      if (deactivateError) {
+        console.error("[invite.service] createInvite deactivate existing invites error:", deactivateError.message, {
+          listId,
+          ids,
+        });
+        throw new Error("Failed to deactivate existing invite code");
+      }
+      console.log("[invite.service] createInvite deactivated existing active invites", {
+        listId,
+        idsCount: ids.length,
+      });
+    }
   }
 
   const expiresInHours = body.expires_in_hours ?? DEFAULT_EXPIRES_HOURS;
@@ -326,10 +334,7 @@ export async function joinByInvite(
     throw new Error("Failed to join list");
   }
 
-  const { error: updateCodeError } = await supabase
-    .from("invite_codes")
-    .update({ used_at: now.toISOString() })
-    .eq("id", inviteRow.id);
+  const { error: updateCodeError } = await supabase.from("invite_codes").delete().eq("id", inviteRow.id);
 
   if (updateCodeError) {
     console.error("[invite.service] joinByInvite update used_at error:", updateCodeError.message, {

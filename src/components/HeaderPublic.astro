@@ -25,7 +25,9 @@ const { showLoginLink = true, isLoggedIn = false } = Astro.props;
     </a>
 
     <div class="flex items-center gap-3">
-      <ThemeToggle client:load />
+      <div class="flex h-8 w-8 items-center justify-center">
+        <ThemeToggle client:only="react" />
+      </div>
       {
         showLoginLink &&
           (isLoggedIn ? (

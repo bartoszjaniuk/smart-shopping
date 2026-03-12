@@ -201,16 +201,18 @@ const InviteCodePanel: FC<InviteCodePanelProps> = ({ listId }) => {
         </button>
       </div>
 
-      {isLoading ? (
-        <div className="rounded-lg border border-border bg-muted/30 px-4 py-4 text-sm text-muted-foreground">
-          Ładowanie aktualnego kodu zaproszenia...
-        </div>
-      ) : isError ? (
+      {!isLoading && isError && (
         <div
           className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs text-destructive"
           role="alert"
         >
           {errorMessage ?? "Nie udało się załadować zaproszeń. Spróbuj ponownie później."}
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="rounded-lg border border-border bg-muted/30 px-4 py-4 text-sm text-muted-foreground">
+          Ładowanie aktualnego kodu zaproszenia...
         </div>
       ) : !activeInvite ? (
         <div className="rounded-lg border border-dashed border-border bg-muted/20 px-4 py-4 text-xs text-muted-foreground">
