@@ -39,33 +39,33 @@ const MemberRow: FC<MemberRowProps> = ({
   };
 
   return (
-    <li className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-3 py-3 last:border-b-0">
+    <li className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-3 py-3 last:border-b-0">
       <div className="flex min-w-0 flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
         <span className="truncate text-sm font-medium text-foreground" title={displayName}>
           {displayName}
         </span>
         <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
           <span
-            className="inline-flex rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+            className="inline-flex rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
             aria-label={`Rola: ${ROLE_LABELS[member.role]}`}
           >
             {ROLE_LABELS[member.role]}
           </span>
           {isCurrentUser && (
-            <span className="inline-flex rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+            <span className="inline-flex rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
               Ty
             </span>
           )}
         </span>
       </div>
-      <div className="flex shrink-0 items-center gap-1">
+      <div className="flex shrink-0 items-center gap-2">
         {canRemoveOther && (
           <button
             type="button"
             onClick={handleRemove}
             disabled={isRemoving}
             aria-label="Usuń użytkownika z listy"
-            className="inline-flex items-center justify-center rounded-full border border-destructive/50 bg-background px-3 py-1.5 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-[40px] items-center justify-center rounded-md border border-destructive/50 bg-background px-4 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Usuń
           </button>
@@ -76,7 +76,7 @@ const MemberRow: FC<MemberRowProps> = ({
             onClick={handleLeave}
             disabled={isRemoving}
             aria-label="Opuść listę"
-            className="inline-flex items-center justify-center rounded-full border border-input bg-background px-3 py-1.5 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex min-h-[40px] items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
           >
             Opuść listę
           </button>

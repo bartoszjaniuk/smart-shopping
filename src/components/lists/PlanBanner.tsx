@@ -29,14 +29,14 @@ const PlanBanner: FC<PlanBannerProps> = ({ viewModel, onOpenPremiumModal, classN
   return (
     <section
       className={
-        "rounded-xl border border-input bg-card px-3 py-3 text-card-foreground shadow-sm md:mb-4 md:rounded-lg md:px-4 " +
+        "rounded-md border border-input bg-card px-3 py-3 text-card-foreground shadow-sm md:mb-4 md:px-4 " +
         (className ?? "")
       }
       aria-label="Informacje o planie"
     >
       <div className="flex items-start gap-3">
         <div
-          className={`mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full md:h-8 md:w-8 ${
+          className={`mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md md:h-8 md:w-8 ${
             isBasic
               ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
               : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
@@ -89,7 +89,7 @@ const PlanBanner: FC<PlanBannerProps> = ({ viewModel, onOpenPremiumModal, classN
             <button
               type="button"
               onClick={handlePrimaryClick}
-              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:min-h-0 md:min-w-0 md:py-1.5 md:text-xs"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:min-h-0 md:min-w-0 md:py-1.5 md:text-xs"
               aria-label={isBasic ? "Zobacz plan Premium" : "Zarządzaj planem"}
             >
               {isBasic ? "Zobacz plan Premium" : "Zarządzaj planem"}

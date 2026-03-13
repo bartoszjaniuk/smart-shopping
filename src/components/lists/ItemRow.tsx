@@ -40,13 +40,13 @@ const ItemRow: FC<ItemRowProps> = ({ item, disabled, onTogglePurchased, onEdit, 
           {item.name}
         </span>
       </button>
-      <div className="flex shrink-0 items-center gap-0.5">
+      <div className="flex shrink-0 items-center gap-1">
         <button
           type="button"
           onClick={onEdit}
           disabled={disabled}
           aria-label="Edytuj"
-          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Pencil className="h-5 w-5" aria-hidden />
         </button>
@@ -55,7 +55,7 @@ const ItemRow: FC<ItemRowProps> = ({ item, disabled, onTogglePurchased, onEdit, 
           onClick={onDelete}
           disabled={disabled}
           aria-label="Usuń"
-          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md text-destructive hover:bg-destructive/10 hover:text-destructive/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Trash2 className="h-5 w-5" aria-hidden />
         </button>

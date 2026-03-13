@@ -51,7 +51,7 @@ const JoinByCodeForm: FC<JoinByCodeFormProps> = ({ initialCode }) => {
           onChange={handleChange}
           aria-invalid={errorMessage ? "true" : "false"}
           aria-describedby={errorMessage ? "join-code-error" : undefined}
-          className={`w-full rounded-xl border bg-background px-3 py-2 text-center font-mono text-lg tracking-[0.3em] shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
+          className={`w-full rounded-md border bg-background px-3 py-2 text-center font-mono text-lg tracking-[0.3em] shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
             errorMessage ? "border-destructive" : "border-input"
           }`}
           placeholder="ABC123"
@@ -69,7 +69,7 @@ const JoinByCodeForm: FC<JoinByCodeFormProps> = ({ initialCode }) => {
       <button
         type="submit"
         disabled={isDisabled}
-        className="inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {viewModel.isSubmitting ? "Dołączanie..." : "Dołącz do listy"}
       </button>

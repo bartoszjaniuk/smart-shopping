@@ -11,27 +11,6 @@ if (!listId) {
 
 <Layout title="Członkowie listy – SmartShopping">
   <AppShellLayout pageTitle="Członkowie listy" activeRoute="/lists" mobileBackHref={`/lists/${listId}`}>
-    <div class="mb-4">
-      <a
-        href={`/lists/${listId}`}
-        class="inline-flex items-center gap-1 rounded-full border border-input bg-background px-3 py-1 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
-      >
-        <svg
-          aria-hidden="true"
-          class="h-4 w-4"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="m15 18-6-6 6-6"></path>
-        </svg>
-        <span>Powrót do listy</span>
-      </a>
-    </div>
-
     <MembersView client:load listId={listId} />
   </AppShellLayout>
 </Layout>

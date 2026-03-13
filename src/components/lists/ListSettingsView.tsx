@@ -140,7 +140,7 @@ const ListSettingsView: FC<ListSettingsViewProps> = ({ listId, onOpenDeleteListM
 
       <section
         aria-label="Strefa niebezpieczna"
-        className="mt-4 space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4"
+        className="mt-4 space-y-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4"
       >
         <h3 className="text-sm font-semibold text-destructive">Strefa niebezpieczna</h3>
         <p className="text-xs text-destructive">
@@ -150,7 +150,7 @@ const ListSettingsView: FC<ListSettingsViewProps> = ({ listId, onOpenDeleteListM
         <button
           type="button"
           onClick={onOpenDeleteListModal}
-          className="inline-flex items-center justify-center rounded-full border border-destructive bg-destructive/10 px-4 py-2 text-xs font-semibold text-destructive shadow-sm transition-colors hover:bg-destructive/20"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-destructive bg-destructive/10 px-4 py-2 text-sm font-semibold text-destructive shadow-sm transition-colors hover:bg-destructive/20"
         >
           Usuń listę
         </button>

@@ -91,7 +91,7 @@ const ListsDashboardView: FC = () => {
               <button
                 type="button"
                 onClick={refetch}
-                className="self-start rounded-full border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted min-h-[44px]"
+                className="self-start rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted min-h-[44px]"
               >
                 Spróbuj ponownie
               </button>
@@ -117,7 +117,7 @@ const ListsDashboardView: FC = () => {
                 window.location.href = "/join";
               }
             }}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-input bg-background px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:rounded-full md:px-3 md:py-1.5 md:text-xs"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:px-3 md:py-1.5 md:text-xs"
             aria-label="Dołącz do listy kodem zaproszenia"
           >
             <svg
@@ -142,7 +142,7 @@ const ListsDashboardView: FC = () => {
           <button
             type="button"
             onClick={() => setIsNewListModalOpen(true)}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:rounded-full md:px-3 md:py-1.5 md:text-xs"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md bg-primary px-4 py-3 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:px-3 md:py-1.5 md:text-xs"
             aria-label="Utwórz nową listę"
           >
             <svg

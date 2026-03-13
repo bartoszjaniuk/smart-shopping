@@ -14,7 +14,7 @@ const ClearPurchasedButton: FC<ClearPurchasedButtonProps> = ({ purchasedCount, d
       type="button"
       disabled={isDisabled}
       onClick={onClick}
-      className="inline-flex items-center justify-center rounded-full border border-input bg-background px-4 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex min-h-[44px] items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
     >
       Wyczyść kupione ({purchasedCount})
     </button>

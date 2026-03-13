@@ -77,7 +77,7 @@ export default function ThemeToggle() {
           );
         }
       }}
-      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       <span className="relative inline-flex h-4 w-4 items-center justify-center">
         <span className={`transition-opacity duration-150 ${isDark ? "opacity-0" : "opacity-100"}`}>

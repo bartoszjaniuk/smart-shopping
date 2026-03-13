@@ -23,7 +23,7 @@ const PremiumFakeDoorModal: FC<PremiumFakeDoorModalProps> = ({ open, onClose }) 
         className="absolute inset-0 -z-10 bg-background/70 backdrop-blur-sm"
         aria-label="Zamknij"
       />
-      <div className="relative flex h-full w-full max-h-dvh flex-col justify-between rounded-t-2xl border border-b-0 bg-card px-5 py-5 text-card-foreground shadow-lg md:h-auto md:max-h-[90vh] md:max-w-md md:rounded-xl md:border-b md:justify-start md:overflow-auto">
+      <div className="relative flex h-full w-full max-h-dvh flex-col justify-between rounded-t-md border border-b-0 bg-card px-5 py-5 text-card-foreground shadow-lg md:h-auto md:max-h-[90vh] md:max-w-md md:rounded-md md:border-b md:justify-start md:overflow-auto">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h2 id="premium-modal-title" className="text-base font-semibold tracking-tight">
@@ -34,7 +34,7 @@ const PremiumFakeDoorModal: FC<PremiumFakeDoorModalProps> = ({ open, onClose }) 
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
             aria-label="Zamknij"
           >
             <svg
@@ -59,7 +59,7 @@ const PremiumFakeDoorModal: FC<PremiumFakeDoorModalProps> = ({ open, onClose }) 
           <li>Priorytetowe wsparcie i przyszłe funkcje</li>
         </ul>
 
-        <p className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+        <p className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
           Płatności będą dostępne w przyszłości. Dziękujemy za zainteresowanie!
         </p>
 
@@ -67,7 +67,7 @@ const PremiumFakeDoorModal: FC<PremiumFakeDoorModalProps> = ({ open, onClose }) 
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
             aria-label="Zamknij"
           >
             Zamknij

@@ -26,11 +26,11 @@ const MembersList: FC<MembersListProps> = ({
         Uczestnicy
       </h2>
       {members.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
+        <p className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
           Brak uczestników
         </p>
       ) : (
-        <ul className="rounded-lg border border-border bg-card" aria-label="Lista uczestników">
+        <ul className="rounded-xl border border-border bg-card" aria-label="Lista uczestników">
           {members.map((member) => (
             <MemberRow
               key={member.id}

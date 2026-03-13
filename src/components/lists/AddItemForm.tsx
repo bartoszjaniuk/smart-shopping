@@ -49,12 +49,12 @@ const AddItemForm: FC<AddItemFormProps> = ({ disabled, onAddItem }) => {
           placeholder={isDisabled ? "Lista tylko do odczytu" : "Dodaj produkt, np. Mleko 2%"}
           aria-invalid={errors.name ? "true" : "false"}
           disabled={isDisabled}
-          className="flex-1 rounded-full border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         />
         <button
           type="submit"
           disabled={isDisabled}
-          className="inline-flex items-center justify-center rounded-full bg-primary px-3 py-2 text-xs font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? "Dodawanie..." : "Dodaj"}
         </button>

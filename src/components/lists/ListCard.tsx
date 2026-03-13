@@ -30,7 +30,7 @@ const ListCard: FC<ListCardProps> = ({ list, onClick }) => {
     <button
       type="button"
       onClick={handleClick}
-      className={`flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left text-sm shadow-sm transition-colors ${
+      className={`flex w-full items-center justify-between gap-3 rounded-md border px-3 py-2 text-left text-sm shadow-sm transition-colors ${
         list.is_disabled
           ? "cursor-not-allowed border-border/60 bg-muted/40 text-muted-foreground/80"
           : "cursor-pointer border-border bg-card hover:bg-muted"
@@ -39,7 +39,7 @@ const ListCard: FC<ListCardProps> = ({ list, onClick }) => {
     >
       <div className="flex items-center gap-3">
         <span
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border shadow-sm"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border shadow-sm"
           style={{ backgroundColor: list.color }}
           aria-hidden="true"
         />
@@ -47,7 +47,7 @@ const ListCard: FC<ListCardProps> = ({ list, onClick }) => {
           <p className="font-medium">
             {list.name.trim() || "Bez nazwy"}
             {list.is_disabled && (
-              <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+              <span className="ml-2 rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
                 Wyłączona
               </span>
             )}

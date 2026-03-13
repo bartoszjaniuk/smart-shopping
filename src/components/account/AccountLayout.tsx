@@ -34,7 +34,7 @@ const AccountLayout: FC<AccountLayoutProps> = ({
     <div className="space-y-8">
       {/* Podsumowanie: e-mail, plan, język */}
       {(email || profile) && (
-        <div className="rounded-xl border border-input bg-muted/30 p-4 text-sm">
+        <div className="rounded-md border border-input bg-muted/30 p-4 text-sm">
           {email && (
             <p className="font-medium text-foreground">
               E-mail: <span className="text-muted-foreground">{email}</span>
@@ -65,7 +65,7 @@ const AccountLayout: FC<AccountLayoutProps> = ({
         <h2 id="account-profile-heading" className="mb-3 text-sm font-semibold tracking-tight text-foreground">
           Profil
         </h2>
-        <div className="rounded-xl border border-input bg-card p-4 text-card-foreground shadow-sm">
+        <div className="rounded-md border border-input bg-card p-4 text-card-foreground shadow-sm">
           <ProfileForm initialLocale={profile?.preferred_locale ?? null} onSuccess={onProfileUpdated} toast={toast} />
         </div>
       </section>
@@ -83,7 +83,7 @@ const AccountLayout: FC<AccountLayoutProps> = ({
         <h2 id="account-security-heading" className="mb-3 text-sm font-semibold tracking-tight text-foreground">
           Bezpieczeństwo
         </h2>
-        <div className="rounded-xl border border-input bg-card p-4 text-card-foreground shadow-sm">
+        <div className="rounded-md border border-input bg-card p-4 text-card-foreground shadow-sm">
           <p className="text-sm text-muted-foreground">
             Zmiana hasła i usunięcie konta będą dostępne w kolejnym kroku implementacji.
           </p>

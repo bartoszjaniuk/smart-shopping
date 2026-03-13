@@ -44,7 +44,7 @@ const AccountView: FC = () => {
           <button
             type="button"
             onClick={() => refetchProfile()}
-            className="inline-flex items-center justify-center rounded-full border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
           >
             Odśwież
           </button>
@@ -64,12 +64,12 @@ const AccountView: FC = () => {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center justify-end gap-2">
+      <div className="mb-6 flex flex-wrap items-center justify-start gap-2">
         <button
           type="button"
           onClick={() => void logout()}
           disabled={isLoggingOut}
-          className="inline-flex items-center justify-center rounded-full border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:opacity-50"
           aria-label="Wyloguj"
         >
           {isLoggingOut ? "Wylogowywanie…" : "Wyloguj"}

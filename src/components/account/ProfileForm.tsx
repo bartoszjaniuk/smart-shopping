@@ -97,7 +97,7 @@ const ProfileForm: FC<ProfileFormProps> = ({ initialLocale, onSuccess, toast }) 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
+        className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
         aria-label="Zapisz język"
       >
         {isSubmitting ? "Zapisywanie…" : "Zapisz"}

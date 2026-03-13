@@ -195,7 +195,7 @@ const InviteCodePanel: FC<InviteCodePanelProps> = ({ listId }) => {
           type="button"
           onClick={handleGenerateInvite}
           disabled={isGenerating}
-          className="inline-flex items-center justify-center rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-[40px] items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isGenerating ? "Generowanie..." : "Generuj kod"}
         </button>
@@ -203,7 +203,7 @@ const InviteCodePanel: FC<InviteCodePanelProps> = ({ listId }) => {
 
       {!isLoading && isError && (
         <div
-          className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs text-destructive"
+          className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-xs text-destructive"
           role="alert"
         >
           {errorMessage ?? "Nie udało się załadować zaproszeń. Spróbuj ponownie później."}
@@ -211,16 +211,16 @@ const InviteCodePanel: FC<InviteCodePanelProps> = ({ listId }) => {
       )}
 
       {isLoading ? (
-        <div className="rounded-lg border border-border bg-muted/30 px-4 py-4 text-sm text-muted-foreground">
+        <div className="rounded-md border border-border bg-muted/30 px-4 py-4 text-sm text-muted-foreground">
           Ładowanie aktualnego kodu zaproszenia...
         </div>
       ) : !activeInvite ? (
-        <div className="rounded-lg border border-dashed border-border bg-muted/20 px-4 py-4 text-xs text-muted-foreground">
+        <div className="rounded-md border border-dashed border-border bg-muted/20 px-4 py-4 text-xs text-muted-foreground">
           Brak aktywnego kodu zaproszenia. Kliknij „Generuj kod”, aby utworzyć nowy kod i zaprosić bliskich do
           współdzielenia listy.
         </div>
       ) : (
-        <div className="space-y-3 rounded-lg border border-border bg-card px-4 py-4 text-xs text-muted-foreground">
+        <div className="space-y-3 rounded-md border border-border bg-card px-4 py-4 text-xs text-muted-foreground">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-primary/80">
@@ -228,7 +228,7 @@ const InviteCodePanel: FC<InviteCodePanelProps> = ({ listId }) => {
               </p>
               <p className="mt-1 text-[13px] text-foreground">Udostępnij ten kod, aby zaprosić kogoś do tej listy.</p>
             </div>
-            <div className="rounded-full bg-muted px-3 py-1 text-[11px] text-muted-foreground">
+            <div className="rounded-md bg-muted px-3 py-1 text-[11px] text-muted-foreground">
               Wygasa: {expiresLabel ?? "nieznana data"}
             </div>
           </div>
@@ -236,7 +236,7 @@ const InviteCodePanel: FC<InviteCodePanelProps> = ({ listId }) => {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <span
-                className="inline-flex min-w-[96px] justify-center rounded-lg bg-muted px-3 py-1.5 font-mono text-lg font-semibold tracking-[0.3em] text-foreground"
+                className="inline-flex min-w-[96px] justify-center rounded-md bg-muted px-4 py-2 font-mono text-lg font-semibold tracking-[0.3em] text-foreground"
                 aria-label="Kod zaproszenia"
               >
                 {activeInvite.code}
@@ -247,14 +247,14 @@ const InviteCodePanel: FC<InviteCodePanelProps> = ({ listId }) => {
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="inline-flex items-center justify-center rounded-full border border-input bg-background px-3 py-1.5 text-[11px] font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+                className="inline-flex min-h-[40px] items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
               >
                 {copiedCode ? "Skopiowano kod" : "Kopiuj kod"}
               </button>
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="inline-flex items-center justify-center rounded-full border border-input bg-background px-3 py-1.5 text-[11px] font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+                className="inline-flex min-h-[40px] items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
               >
                 {copiedLink ? "Skopiowano link" : "Kopiuj link"}
               </button>

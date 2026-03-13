@@ -65,7 +65,7 @@ const EditItemSheet: FC<EditItemSheetProps> = ({ open, initialName, onSave, onCl
         className="absolute inset-0 -z-10 bg-background/70 backdrop-blur-sm"
         aria-label="Zamknij"
       />
-      <div className="relative flex h-full w-full max-h-dvh flex-col rounded-t-2xl border border-b-0 bg-card px-5 py-5 text-card-foreground shadow-lg md:h-auto md:max-h-[90vh] md:max-w-md md:rounded-xl md:border-b md:overflow-auto">
+      <div className="relative flex h-full w-full max-h-dvh flex-col rounded-t-md border border-b-0 bg-card px-5 py-5 text-card-foreground shadow-lg md:h-auto md:max-h-[90vh] md:max-w-md md:rounded-md md:border-b md:overflow-auto">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <h2 id="edit-item-sheet-title" className="text-base font-semibold tracking-tight">
@@ -78,12 +78,12 @@ const EditItemSheet: FC<EditItemSheetProps> = ({ open, initialName, onSave, onCl
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
             aria-label="Zamknij edycję produktu"
           >
             <svg
               aria-hidden="true"
-              className="h-4 w-4"
+              className="h-5 w-5"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -119,18 +119,18 @@ const EditItemSheet: FC<EditItemSheetProps> = ({ open, initialName, onSave, onCl
               )}
             </div>
 
-            <div className="flex flex-wrap items-center justify-end gap-2 pt-2">
+            <div className="grid grid-cols-2 gap-3 pt-4">
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex items-center justify-center rounded-full border border-input bg-background px-4 py-2 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
+                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
               >
                 Anuluj
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-xs font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-60"
+                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-60"
               >
                 {isSubmitting ? "Zapisywanie..." : "Zapisz"}
               </button>
