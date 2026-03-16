@@ -4,11 +4,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
+import type { CategoryDto } from "../../types";
+
 const editItemSchema = z.object({
   name: z
     .string()
     .transform((value) => value.trim())
     .pipe(z.string().min(1, "Nazwa produktu jest wymagana").max(50, "Nazwa może mieć maks. 50 znaków")),
+  category_id: z.string().optional(),
 });
 
 type EditItemFormValues = z.infer<typeof editItemSchema>;
@@ -17,14 +20,23 @@ interface EditItemSheetProps {
   open: boolean;
   itemId: string | null;
   initialName: string;
-  onSave(name: string): void | Promise<void>;
+  initialCategoryId: string | null;
+  categories: CategoryDto[];
+  onSave(name: string, categoryId: string | null): void | Promise<void>;
   onClose(): void;
 }
 
-const EditItemSheet: FC<EditItemSheetProps> = ({ open, initialName, onSave, onClose }) => {
+const EditItemSheet: FC<EditItemSheetProps> = ({
+  open,
+  initialName,
+  initialCategoryId,
+  categories,
+  onSave,
+  onClose,
+}) => {
   const form = useForm<EditItemFormValues>({
     resolver: zodResolver(editItemSchema),
-    defaultValues: { name: initialName },
+    defaultValues: { name: initialName, category_id: initialCategoryId ?? undefined },
   });
 
   const {
@@ -36,9 +48,9 @@ const EditItemSheet: FC<EditItemSheetProps> = ({ open, initialName, onSave, onCl
 
   useEffect(() => {
     if (open && initialName !== undefined) {
-      reset({ name: initialName });
+      reset({ name: initialName, category_id: initialCategoryId ?? undefined });
     }
-  }, [open, initialName, reset]);
+  }, [open, initialName, initialCategoryId, reset]);
 
   if (!open) {
     return null;
@@ -47,7 +59,7 @@ const EditItemSheet: FC<EditItemSheetProps> = ({ open, initialName, onSave, onCl
   const handleFormSubmit = (event: React.BaseSyntheticEvent) => {
     event.preventDefault();
     void handleSubmit(async (values) => {
-      await onSave(values.name.trim());
+      await onSave(values.name.trim(), values.category_id ?? null);
       onClose();
     })();
   };
@@ -71,9 +83,7 @@ const EditItemSheet: FC<EditItemSheetProps> = ({ open, initialName, onSave, onCl
             <h2 id="edit-item-sheet-title" className="text-base font-semibold tracking-tight">
               Edytuj produkt
             </h2>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Zmień nazwę produktu. Kategoria może być edytowana w kolejnych wersjach.
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Zmień nazwę produktu i jego kategorię.</p>
           </div>
           <button
             type="button"
@@ -117,6 +127,24 @@ const EditItemSheet: FC<EditItemSheetProps> = ({ open, initialName, onSave, onCl
                   {errors.name.message}
                 </p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="edit-item-category" className="block text-sm font-medium text-foreground">
+                Kategoria
+              </label>
+              <select
+                id="edit-item-category"
+                {...register("category_id")}
+                className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="">Wybierz kategorię</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-4">

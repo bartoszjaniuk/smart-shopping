@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type {
+  CategoryDto,
   CategorySectionViewModel,
   ListDetailDto,
   ListDetailViewModel,
@@ -91,6 +92,7 @@ const initialViewModel: ListDetailViewModel = {
   items: [],
   categorySections: [],
   purchasedItems: [],
+  categories: [],
   isLoadingList: true,
   isLoadingItems: true,
   isMutating: false,
@@ -144,6 +146,7 @@ export interface InitialSessionForRealtime {
 export function useListDetail(listId: string, initialSession: InitialSessionForRealtime | null = null) {
   const [list, setList] = useState<ListDetailDto | null>(null);
   const [items, setItems] = useState<ListItemDto[]>([]);
+  const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [categoryNameByCode, setCategoryNameByCode] = useState<Record<string, string>>({});
 
   const [isLoadingList, setIsLoadingList] = useState(true);
@@ -169,8 +172,9 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
           headers: { Accept: "application/json" },
         });
         if (!mounted || !response.ok) return;
-        const { data } = (await response.json()) as { data: { code: string; name: string }[] };
+        const { data } = (await response.json()) as { data: CategoryDto[] };
         if (!mounted || !data) return;
+        setCategories(data);
         const map: Record<string, string> = {};
         for (const c of data) {
           map[c.code] = c.name;
@@ -788,6 +792,7 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
         ...initialViewModel,
         list,
         items,
+        categories,
         isLoadingList,
         isLoadingItems,
         isMutating,
@@ -808,6 +813,7 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
       items,
       categorySections,
       purchasedItems,
+      categories,
       isLoadingList,
       isLoadingItems,
       isMutating,
@@ -822,6 +828,7 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
   }, [
     list,
     items,
+    categories,
     categoryNameByCode,
     isLoadingList,
     isLoadingItems,

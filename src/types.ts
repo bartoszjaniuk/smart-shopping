@@ -354,6 +354,8 @@ export interface ListDetailViewModel {
   items: ListItemDto[];
   categorySections: CategorySectionViewModel[];
   purchasedItems: ItemRowViewModel[];
+  /** Predefined categories loaded from `/api/categories` for editing items. */
+  categories: CategoryDto[];
   isLoadingList: boolean;
   isLoadingItems: boolean;
   isMutating: boolean;

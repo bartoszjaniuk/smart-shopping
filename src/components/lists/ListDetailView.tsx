@@ -167,8 +167,10 @@ const ListDetailView: FC<ListDetailViewProps> = ({ listId, initialSession }) => 
           open={!!editingItemId}
           itemId={editingItemId}
           initialName={viewModel.items.find((i) => i.id === editingItemId)?.name ?? ""}
-          onSave={async (name) => {
-            await updateItem(editingItemId, { name });
+          initialCategoryId={viewModel.items.find((i) => i.id === editingItemId)?.category_id ?? null}
+          categories={viewModel.categories}
+          onSave={async (name: string, categoryId: string | null) => {
+            await updateItem(editingItemId, { name, category_id: categoryId ?? undefined });
           }}
           onClose={() => setEditingItemId(null)}
         />
