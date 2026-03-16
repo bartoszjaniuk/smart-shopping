@@ -1,5 +1,5 @@
 import type { FC, SubmitEvent } from "react";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import ErrorSummary from "../ErrorSummary";
 import { useAddItemForm } from "../hooks/useAddItemForm";
@@ -15,22 +15,24 @@ const AddItemForm: FC<AddItemFormProps> = ({ disabled, onAddItem }) => {
   const { form, handleSubmit, serverError } = useAddItemForm({
     async onSubmitName(name: string) {
       await onAddItem(name);
-      // Po sukcesie wracamy focusem do inputu, aby przyspieszyć pracę w sklepie.
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
     },
   });
 
   const {
     register,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitSuccessful },
   } = form;
+
+  useEffect(() => {
+    if (isSubmitSuccessful && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isSubmitSuccessful]);
 
   const handleFormSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (disabled) return;
-    void handleSubmit();
+    handleSubmit();
   };
 
   const isDisabled = disabled || isSubmitting;
