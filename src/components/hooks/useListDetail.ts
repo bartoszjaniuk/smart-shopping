@@ -45,7 +45,6 @@ function groupItemsByCategory(
 
     if (viewModel.isPurchased) {
       purchasedItems.push(viewModel);
-      continue;
     }
 
     const key = item.category_id ?? item.category_code;

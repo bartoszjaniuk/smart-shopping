@@ -26,14 +26,6 @@ const ItemRow: FC<ItemRowProps> = ({ item, disabled, onTogglePurchased, onEdit, 
         className="flex min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span
-          aria-hidden="true"
-          className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded border border-input bg-background ${
-            item.isPurchased ? "bg-primary text-primary-foreground" : ""
-          }`}
-        >
-          {item.isPurchased && <span className="block h-3 w-3 rounded-full bg-primary-foreground" />}
-        </span>
-        <span
           className={`flex-1 min-w-0 truncate ${item.isPurchased ? "text-muted-foreground line-through" : ""}`}
           title={item.name}
         >

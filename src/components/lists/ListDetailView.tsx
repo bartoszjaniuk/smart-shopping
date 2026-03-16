@@ -6,7 +6,6 @@ import AddItemForm from "./AddItemForm";
 import RealtimeStatusIndicator from "./RealtimeStatusIndicator";
 import ListHeader from "./ListHeader";
 import CategorySection from "./CategorySection";
-import PurchasedSection from "./PurchasedSection";
 import EmptyListState from "./EmptyListState";
 import ClearPurchasedButton from "./ClearPurchasedButton";
 import ConfirmClearPurchasedModal from "./ConfirmClearPurchasedModal";
@@ -95,7 +94,7 @@ const ListDetailView: FC<ListDetailViewProps> = ({ listId, initialSession }) => 
     );
   }
 
-  const hasItems = viewModel.categorySections.length > 0 || viewModel.purchasedItems.length > 0;
+  const hasItems = viewModel.categorySections.length > 0;
 
   return (
     <div className="flex flex-1 flex-col gap-4 py-4">
@@ -118,38 +117,22 @@ const ListDetailView: FC<ListDetailViewProps> = ({ listId, initialSession }) => 
         {!hasItems ? (
           <EmptyListState />
         ) : (
-          <>
-            {/* Sekcje kategorii (niekupione) */}
-            <div className="space-y-4">
-              {viewModel.categorySections.map((section) => (
-                <CategorySection
-                  key={section.categoryId}
-                  category={section}
-                  disabled={!viewModel.canEditItems}
-                  onTogglePurchased={async (itemId, next) => {
-                    await togglePurchased(itemId, next);
-                  }}
-                  onEdit={(itemId) => setEditingItemId(itemId)}
-                  onDelete={async (itemId) => {
-                    await deleteItem(itemId);
-                  }}
-                />
-              ))}
-            </div>
-
-            {/* Sekcja kupionych produktów */}
-            <PurchasedSection
-              items={viewModel.purchasedItems}
-              disabled={!viewModel.canEditItems}
-              onTogglePurchased={async (itemId, next) => {
-                await togglePurchased(itemId, next);
-              }}
-              onEdit={(itemId) => setEditingItemId(itemId)}
-              onDelete={async (itemId) => {
-                await deleteItem(itemId);
-              }}
-            />
-          </>
+          <div className="space-y-4">
+            {viewModel.categorySections.map((section) => (
+              <CategorySection
+                key={section.categoryId}
+                category={section}
+                disabled={!viewModel.canEditItems}
+                onTogglePurchased={async (itemId, next) => {
+                  await togglePurchased(itemId, next);
+                }}
+                onEdit={(itemId) => setEditingItemId(itemId)}
+                onDelete={async (itemId) => {
+                  await deleteItem(itemId);
+                }}
+              />
+            ))}
+          </div>
         )}
       </section>
 
@@ -158,7 +141,7 @@ const ListDetailView: FC<ListDetailViewProps> = ({ listId, initialSession }) => 
         aria-label="Akcje listy"
         className="sticky inset-x-0 bottom-0 -mx-4 mt-4 border-t bg-background/95 px-4 pb-safe pt-3 md:static md:mx-0 md:border-none md:bg-transparent md:px-0 md:pb-0"
       >
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
+        <div className="mx-auto flex max-w-5xl items-center justify-start gap-3">
           <ClearPurchasedButton
             purchasedCount={viewModel.purchasedItems.length}
             disabled={!viewModel.canClearPurchased}
@@ -166,7 +149,6 @@ const ListDetailView: FC<ListDetailViewProps> = ({ listId, initialSession }) => 
               setIsConfirmClearOpen(true);
             }}
           />
-          <p className="text-[11px] text-muted-foreground">Kupione: {viewModel.purchasedItems.length} pozycji</p>
         </div>
       </section>
 
