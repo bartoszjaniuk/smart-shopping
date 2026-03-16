@@ -55,11 +55,13 @@ const isMobileNested = Boolean(mobileBackHref);
         class="flex min-h-[44px] min-w-[44px] items-center gap-2 text-sm font-semibold tracking-tight text-foreground hover:text-foreground/80 sm:min-h-0 sm:min-w-0"
         aria-label="SmartShopping – strona główna"
       >
-        <span
-          class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-xs font-bold text-primary sm:h-6 sm:w-6"
-        >
-          SS
-        </span>
+        <img
+          src="/pwa/icon-192x192.png"
+          alt="SmartShopping"
+          class="h-7 w-7 shrink-0 rounded-md sm:h-6 sm:w-6"
+          loading="lazy"
+          decoding="async"
+        />
         <span class="truncate max-w-28 sm:max-w-none">SmartShopping</span>
       </a>
 
