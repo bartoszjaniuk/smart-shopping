@@ -18,12 +18,12 @@ const ItemRow: FC<ItemRowProps> = ({ item, disabled, onTogglePurchased, onEdit, 
   };
 
   return (
-    <div className="flex items-center justify-between gap-3 px-3 py-2 text-sm text-foreground">
+    <div className="flex w-full items-center justify-between gap-3 overflow-hidden px-3 py-2 text-sm text-foreground">
       <button
         type="button"
         onClick={handleToggle}
         disabled={disabled}
-        className="flex flex-1 items-center gap-3 text-left disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span
           aria-hidden="true"
@@ -34,7 +34,7 @@ const ItemRow: FC<ItemRowProps> = ({ item, disabled, onTogglePurchased, onEdit, 
           {item.isPurchased && <span className="block h-3 w-3 rounded-full bg-primary-foreground" />}
         </span>
         <span
-          className={`max-w-[16rem] truncate ${item.isPurchased ? "text-muted-foreground line-through" : ""}`}
+          className={`flex-1 min-w-0 truncate ${item.isPurchased ? "text-muted-foreground line-through" : ""}`}
           title={item.name}
         >
           {item.name}
