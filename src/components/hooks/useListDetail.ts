@@ -15,10 +15,14 @@ import type { SupabaseClient } from "../../db/supabase.client";
 const DEFAULT_ITEMS_PAGE = 1;
 const DEFAULT_ITEMS_PAGE_SIZE = 100;
 
-function getCategoryLocale(): "pl" | "en" {
-  if (typeof navigator === "undefined" || !navigator.language) return "en";
-  return navigator.language.toLowerCase().startsWith("pl") ? "pl" : "en";
-}
+import {
+  applyDocumentLocale,
+  fetchProfilePreferredLocale,
+  getClientAppLocaleFallback,
+  getStoredAppLocale,
+  setStoredAppLocale,
+  type AppLocale,
+} from "../../lib/locale";
 
 function mapItemToViewModel(item: ListItemDto, categoryNameByCode: Record<string, string>): ItemRowViewModel {
   return {
@@ -148,6 +152,9 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
   const [items, setItems] = useState<ListItemDto[]>([]);
   const [categories, setCategories] = useState<CategoryDto[]>([]);
   const [categoryNameByCode, setCategoryNameByCode] = useState<Record<string, string>>({});
+  const [categoryLocale, setCategoryLocale] = useState<AppLocale>(
+    () => getStoredAppLocale() ?? getClientAppLocaleFallback()
+  );
 
   const [isLoadingList, setIsLoadingList] = useState(true);
   const [isLoadingItems, setIsLoadingItems] = useState(true);
@@ -163,11 +170,40 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const locale = getCategoryLocale();
+
+    const onLocaleChange = (event: Event) => {
+      const next = (event as CustomEvent<{ locale?: AppLocale }>).detail?.locale;
+      if (!next) return;
+      setCategoryLocale(next);
+    };
+
+    window.addEventListener("app:localechange", onLocaleChange as EventListener);
+
+    return () => {
+      window.removeEventListener("app:localechange", onLocaleChange as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const fromProfile = await fetchProfilePreferredLocale();
+      if (!mounted || !fromProfile) return;
+      setStoredAppLocale(fromProfile);
+      applyDocumentLocale(fromProfile);
+      setCategoryLocale(fromProfile);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     let mounted = true;
     (async () => {
       try {
-        const response = await fetch(`/api/categories?locale=${locale}`, {
+        const response = await fetch(`/api/categories?locale=${categoryLocale}`, {
           method: "GET",
           headers: { Accept: "application/json" },
         });
@@ -187,7 +223,7 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [categoryLocale]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -222,7 +258,6 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
 
     const triggerRefetch = () => {
       if (mounted) {
-        console.log("[Realtime] broadcast event received, refetching list/items");
         setRealtimeStatus((prev) => (prev === "online" ? "syncing" : prev));
         setReloadToken((t) => t + 1);
       }
@@ -230,7 +265,6 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
 
     const setStatusFromChannel = (channelName: string, status: string) => {
       if (!mounted) return;
-      console.log("[Realtime] channel status", { channel: channelName, status });
       if (status === "SUBSCRIBED") {
         setRealtimeStatus((prev) => (prev === "connecting" ? "online" : prev));
       } else if (status === "CHANNEL_ERROR" || status === "CLOSED" || status === "TIMED_OUT") {
@@ -258,20 +292,14 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
         }
         if (tokenForRealtime) {
           await supabase.realtime.setAuth(tokenForRealtime);
-          console.log("[Realtime] setAuth called with token");
         } else {
           await supabase.realtime.setAuth();
-          console.log("[Realtime] setAuth called without token (anonymous)");
         }
 
         const usePrivateChannel = true;
         const topicList = `list:${listId}`;
         const topicItems = `list:${listId}:items`;
         const topicMembers = `list:${listId}:members`;
-        console.log("[Realtime] subscribing to private channels", {
-          listId,
-          topics: [topicList, topicItems, topicMembers],
-        });
 
         const channelList = supabase.channel(topicList, {
           config: { broadcast: { self: false }, private: usePrivateChannel },
@@ -320,8 +348,7 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
           .on("broadcast", { event: "DELETE" }, () => triggerRefetch());
         channelMembers.subscribe((status) => setStatusFromChannel(topicMembers, status));
         channels.push(channelMembers);
-      } catch (err) {
-        console.error("[Realtime] setup failed", err);
+      } catch {
         if (mounted) setRealtimeStatus("unavailable");
       }
     })();
@@ -330,7 +357,6 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
       mounted = false;
       const client = supabase;
       if (client && channels.length > 0) {
-        console.log("[Realtime] cleaning up channels", { listId, count: channels.length });
         channels.forEach((ch) => client.removeChannel(ch));
       }
     };

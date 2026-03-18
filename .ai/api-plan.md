@@ -143,11 +143,12 @@ Authentication is handled by **Supabase Auth** (email/password). The API expects
 ```json
 {
   "name": "Weekly shopping",
-  "color": "#E8F5E9"
+  "color": "#E8F5E9",
+  "description": "Lista z notatką (opcjonalnie)."
 }
 ```
 
-- **Validation:** `name` required, max 100 chars; `color` optional, max 20 chars (e.g. hex). If `color` omitted, default is `#C3B1E1`.
+- **Validation:** `name` required, max 100 chars; `color` optional, max 20 chars (e.g. hex). If `color` omitted, default is `#C3B1E1`. `description` optional, max 500 chars.
 - **Response (201):**
 
 ```json
@@ -156,6 +157,7 @@ Authentication is handled by **Supabase Auth** (email/password). The API expects
   "owner_id": "uuid",
   "name": "Weekly shopping",
   "color": "#E8F5E9",
+  "description": "Lista z notatką (opcjonalnie).",
   "created_at": "ISO8601",
   "updated_at": "ISO8601"
 }
@@ -173,6 +175,7 @@ Authentication is handled by **Supabase Auth** (email/password). The API expects
   "owner_id": "uuid",
   "name": "string",
   "color": "#hex",
+  "description": "string",
   "created_at": "ISO8601",
   "updated_at": "ISO8601",
   "is_disabled": false,
@@ -184,7 +187,7 @@ Authentication is handled by **Supabase Auth** (email/password). The API expects
 
 **PATCH /api/lists/:listId**
 
-- **Request body:** `{ "name": "string", "color": "string" }` (both optional).
+- **Request body:** `{ "name": "string", "color": "string", "description": "string" }` (all optional).
 - **Validation:** Same as POST; at least one field required.
 - **Response (200):** Same as GET /api/lists/:listId.
 - **Errors:** `400 Bad Request`, `401 Unauthorized`, `403 Forbidden` (not owner), `404 Not Found`.

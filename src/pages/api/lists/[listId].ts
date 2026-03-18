@@ -78,7 +78,7 @@ export const GET: APIRoute = async (context) => {
 
 /**
  * PATCH /api/lists/:listId
- * Body: { name?: string, color?: string } – at least one required. Owner only.
+ * Body: { name?: string, color?: string, description?: string } – at least one required. Owner only.
  * Returns 200 with ListDetailDto, or 400/401/403/404/500.
  */
 export const PATCH: APIRoute = async (context) => {
@@ -103,7 +103,7 @@ export const PATCH: APIRoute = async (context) => {
     return json({ error: "Validation failed", details: "Invalid JSON body" }, 400);
   }
 
-  let body: { name?: string; color?: string };
+  let body: { name?: string; color?: string; description?: string };
   try {
     body = parseUpdateListBody(rawBody);
   } catch (err) {

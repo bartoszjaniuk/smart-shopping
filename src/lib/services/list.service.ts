@@ -49,10 +49,11 @@ export class BadRequestError extends Error {
   }
 }
 
-/** Validated body for createList: name and color (always set after validation). */
+/** Validated body for createList: name, color and optional description. */
 export interface CreateListValidatedBody {
   name: string;
   color: string;
+  description: string;
 }
 
 /**
@@ -61,7 +62,7 @@ export interface CreateListValidatedBody {
  *
  * @param supabase - Supabase client from context.locals (user JWT)
  * @param userId - auth.uid()
- * @param body - Validated body (name + color; color filled with DEFAULT_LIST_COLOR if omitted)
+ * @param body - Validated body (name + color + description; color filled with DEFAULT_LIST_COLOR if omitted)
  * @returns Created list row as ListDto
  * @throws PlanLimitError when user is Basic and already has one list (403)
  * @throws Error on Supabase errors (e.g. RLS, DB failure) – map to 500 in route
@@ -112,6 +113,7 @@ export async function createList(
     owner_id: userId,
     name: body.name,
     color: body.color,
+    description: body.description,
   };
 
   const { data: listRow, error: listError } = await supabase.from("lists").insert(listInsert).select().single();
@@ -149,6 +151,7 @@ function toListDto(row: ListRow): ListDto {
     owner_id: row.owner_id,
     name: row.name,
     color: row.color,
+    description: row.description,
     created_at: row.created_at,
     updated_at: row.updated_at,
   };
@@ -224,6 +227,7 @@ export async function listLists(
       owner_id: row.owner_id,
       name: row.name,
       color: row.color,
+      description: row.description,
       created_at: row.created_at,
       updated_at: row.updated_at,
       is_disabled: disabledListIds.has(row.id),
@@ -276,6 +280,7 @@ export async function getListById(
     owner_id: listRow.owner_id,
     name: listRow.name,
     color: listRow.color,
+    description: listRow.description,
     created_at: listRow.created_at,
     updated_at: listRow.updated_at,
     is_disabled: disabledListIds.has(listRow.id),
@@ -283,19 +288,20 @@ export async function getListById(
   };
 }
 
-/** Validated body for updateList: at least one of name or color (only provided fields). */
+/** Validated body for updateList: at least one of name, color or description (only provided fields). */
 export interface UpdateListValidatedBody {
   name?: string;
   color?: string;
+  description?: string;
 }
 
 /**
- * Updates list name and/or color. Allowed only for the list owner.
+ * Updates list name, color and/or description. Allowed only for the list owner.
  *
  * @param supabase - Supabase client from context.locals (user JWT)
  * @param userId - auth.uid()
  * @param listId - List UUID
- * @param body - Validated body (only name and/or color; only provided fields are updated)
+ * @param body - Validated body (only name and/or color and/or description; only provided fields are updated)
  * @returns Updated list as ListDetailDto
  * @throws NotFoundError when list does not exist
  * @throws ForbiddenError when user is not the owner
@@ -322,9 +328,10 @@ export async function updateList(
 
   if (listRow.owner_id !== userId) throw new ForbiddenError("Forbidden");
 
-  const updatePayload: { name?: string; color?: string } = {};
+  const updatePayload: { name?: string; color?: string; description?: string } = {};
   if (body.name !== undefined) updatePayload.name = body.name;
   if (body.color !== undefined) updatePayload.color = body.color;
+  if (body.description !== undefined) updatePayload.description = body.description;
 
   const { error: updateError } = await supabase.from("lists").update(updatePayload).eq("id", listId);
 

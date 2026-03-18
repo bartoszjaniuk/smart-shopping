@@ -129,7 +129,7 @@ export interface CategoriesViewViewModel {
 // ---------------------------------------------------------------------------
 
 /** Base list fields returned by POST 201 and GET single list (no computed fields). */
-export type ListDto = Pick<ListRow, "id" | "owner_id" | "name" | "color" | "created_at" | "updated_at">;
+export type ListDto = Pick<ListRow, "id" | "owner_id" | "name" | "color" | "description" | "created_at" | "updated_at">;
 
 /**
  * GET /api/lists response item. ListDto + computed is_disabled, optional item_count, my_role.
@@ -152,13 +152,14 @@ export interface ListDetailDto extends ListDto {
 /** POST /api/lists request body. name required; color optional (default #C3B1E1); owner_id set server-side. */
 export type CreateListCommand = Pick<ListRow, "name"> & {
   color?: ListRow["color"];
+  description?: ListRow["description"];
 };
 
 /** Default list color when not provided in POST /api/lists. */
 export const DEFAULT_LIST_COLOR = "#C3B1E1" as const;
 
 /** PATCH /api/lists/:listId request body. At least one field required (validated in API). */
-export type UpdateListCommand = Partial<Pick<ListRow, "name" | "color">>;
+export type UpdateListCommand = Partial<Pick<ListRow, "name" | "color" | "description">>;
 
 // ---------------------------------------------------------------------------
 // Lists dashboard – DTOs and ViewModels (frontend)
@@ -213,6 +214,7 @@ export interface PlanBannerViewModel {
 export interface NewListFormValues {
   name: string;
   color?: string;
+  description: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -226,6 +228,7 @@ export type ListFormMode = "create" | "edit";
 export interface ListFormValues {
   name: string;
   color?: string;
+  description: string;
 }
 
 /** Aggregated view model describing ListForm UI state. */

@@ -79,7 +79,7 @@ const AccountLayout: FC<AccountLayoutProps> = ({
       </section>
 
       {/* Sekcja: Bezpieczeństwo – placeholder na ChangePasswordForm i DeleteAccountSection */}
-      <section aria-labelledby="account-security-heading">
+      {/* <section aria-labelledby="account-security-heading">
         <h2 id="account-security-heading" className="mb-3 text-sm font-semibold tracking-tight text-foreground">
           Bezpieczeństwo
         </h2>
@@ -88,7 +88,7 @@ const AccountLayout: FC<AccountLayoutProps> = ({
             Zmiana hasła i usunięcie konta będą dostępne w kolejnym kroku implementacji.
           </p>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 };

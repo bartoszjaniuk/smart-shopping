@@ -233,6 +233,7 @@ Widok musi respektować limity planu (Basic/Premium), zapewniać natychmiastową
   - `ListFormValues`:
     - `name: string` – nazwa listy, required.
     - `color?: string` – kod koloru (hex), opcjonalnie undefined (ustawiany na `DEFAULT_LIST_COLOR`).
+    - `description?: string` – notatka do listy (stored jako string), maks. 500 znaków.
   - `ListFormViewModel`:
     - `values: ListFormValues` – aktualne wartości formularza.
     - `isSubmitting: boolean` – stan ładowania podczas wywołania API.
@@ -265,8 +266,9 @@ Widok musi respektować limity planu (Basic/Premium), zapewniać natychmiastową
     - Schema `ListFormSchema`:
       - `name: z.string().trim().min(1).max(100)`.
       - `color: z.string().optional()` z dodatkową rafinacją `refine`, że jeśli ustawione, to jest z palety.
+      - `description: z.string().trim().max(500).optional()` (domyślnie `""`).
     - Inicjalizacja:
-      - create: `defaultValues` ustawione na pustą nazwę i domyślny kolor.
+      - create: `defaultValues` ustawione na pustą nazwę, domyślny kolor i pustą notatkę (`""`).
       - edit: `defaultValues` oparte na `ListDetailDto`.
   - Stan pochodny:
     - `isSubmitting` z `react-hook-form` + `useMutation.isPending`.
@@ -275,6 +277,8 @@ Widok musi respektować limity planu (Basic/Premium), zapewniać natychmiastową
     - Błędy schemy `zod` w polach.
     - Błędy serwerowe mapowane na:
       - `setError("name", { message })` dla walidacji nazwy,
+      - `setError("color", { message })` dla walidacji koloru,
+      - `setError("description", { message })` dla walidacji notatki,
       - globalny `serverError` dla innych przypadków (np. 500).
 
 - **Custom hook (opcjonalny)**
@@ -295,9 +299,10 @@ Widok musi respektować limity planu (Basic/Premium), zapewniać natychmiastową
     - Body typowane jako `CreateListCommand`:
       - `name: string`
       - `color?: string`
+      - `description?: string`
     - Dane pochodzą bezpośrednio z `ListFormValues` (po `trim()` i ewentualnym zastąpieniu `undefined` domyślnym kolorem).
   - Odpowiedź:
-    - 201 z `ListDto` (id, owner_id, name, color, timestamps).
+    - 201 z `ListDto` (id, owner_id, name, color, description, timestamps).
   - Obsługa w UI:
     - Po sukcesie:
       - Zamknięcie modalu (create z `/lists`).
@@ -308,13 +313,14 @@ Widok musi respektować limity planu (Basic/Premium), zapewniać natychmiastową
 - **Edycja listy – GET/PATCH `/api/lists/:listId`**
   - GET:
     - Odpowiedź 200 z `ListDetailDto`:
-      - `id`, `owner_id`, `name`, `color`, `is_disabled`, `my_role`, timestamps.
+      - `id`, `owner_id`, `name`, `color`, `description`, `is_disabled`, `my_role`, timestamps.
     - Wymagania:
       - Jeśli `my_role !== "owner"` – front może pokazać informację o braku uprawnień i nie renderować formularza.
   - PATCH:
     - Body typowane jako `UpdateListCommand`:
       - `name?: string`
       - `color?: string`
+      - `description?: string`
     - Wysyłane tylko pola, które się zmieniły (opcjonalna optymalizacja, ale nie wymagana – API toleruje oba pola).
     - Odpowiedź 200 z `ListDetailDto`.
   - Obsługa w UI:
@@ -369,6 +375,9 @@ Widok musi respektować limity planu (Basic/Premium), zapewniać natychmiastową
   - `color`:
     - Maks. 20 znaków (wg API – np. hex).
     - Powinien pochodzić z predefiniowanej palety pastelowych kolorów.
+  - `description`:
+    - Maks. 500 znaków.
+    - Pole opcjonalne (notatka na listę).
   - Plan Basic:
     - Tylko 1 lista, której użytkownik jest właścicielem (limit sprawdzany w API).
   - Uprawnienia:

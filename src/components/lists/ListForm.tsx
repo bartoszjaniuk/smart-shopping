@@ -56,6 +56,21 @@ const ListForm: FC<ListFormProps> = (props) => {
       </div>
 
       <div className="space-y-2">
+        <label htmlFor="list-description" className="block text-sm font-medium text-foreground">
+          Notatka (description)
+        </label>
+        <textarea
+          id="list-description"
+          {...register("description")}
+          placeholder="Np. Co warto kupić oprócz podstawowych rzeczy..."
+          rows={3}
+          className="block w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        />
+        <p className="text-xs text-muted-foreground">Opcjonalnie, maks. 500 znaków.</p>
+        {errors.description?.message && <p className="text-xs text-destructive">{errors.description.message}</p>}
+      </div>
+
+      <div className="space-y-2">
         <p className="text-sm font-medium text-foreground">Kolor listy</p>
         <p className="text-xs text-muted-foreground">
           Wybierz pastelowy kolor, który pomoże szybko odróżnić listę na dashboardzie.

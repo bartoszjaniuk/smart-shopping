@@ -21,6 +21,7 @@ export function useListForm(options: UseListFormOptions) {
     defaultValues: {
       name: options.initialValues?.name ?? "",
       color: options.initialValues?.color ?? DEFAULT_LIST_COLOR,
+      description: options.initialValues?.description ?? "",
     },
   });
 
@@ -41,9 +42,16 @@ export function useListForm(options: UseListFormOptions) {
             form.setError("name", { type: "server", message });
           } else if (field === "color" && message) {
             form.setError("color", { type: "server", message });
+          } else if (field === "description" && message) {
+            form.setError("description", { type: "server", message });
           }
         }
-        if (!form.formState.errors.name && !form.formState.errors.color && data?.error) {
+        if (
+          !form.formState.errors.name &&
+          !form.formState.errors.color &&
+          !form.formState.errors.description &&
+          data?.error
+        ) {
           setServerError(data.error);
         }
       } else if (data?.error) {
@@ -63,6 +71,7 @@ export function useListForm(options: UseListFormOptions) {
     const payload = {
       name: values.name.trim(),
       color: values.color ?? DEFAULT_LIST_COLOR,
+      description: values.description?.trim() ?? "",
     };
 
     try {
@@ -101,6 +110,7 @@ export function useListForm(options: UseListFormOptions) {
           {
             name: "",
             color: DEFAULT_LIST_COLOR,
+            description: "",
           },
           { keepIsSubmitted: false, keepTouched: false }
         );
@@ -121,6 +131,7 @@ export function useListForm(options: UseListFormOptions) {
         body: JSON.stringify({
           name: payload.name,
           color: payload.color,
+          description: payload.description,
         }),
       });
 

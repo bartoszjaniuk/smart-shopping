@@ -5,7 +5,7 @@
 Trzy metody obsługiwane pod tym samym wzorcem URL (`/api/lists/:listId`) realizują operacje na pojedynczej liście zakupów:
 
 - **GET** – odczyt szczegółów listy (dla użytkownika z dostępem: owner lub editor). Zwracany jest obiekt z pól z bazy oraz pól obliczanych: `is_disabled`, `my_role`.
-- **PATCH** – aktualizacja nazwy i/lub koloru listy. Dozwolona **tylko dla właściciela** listy.
+- **PATCH** – aktualizacja nazwy i/lub koloru i/lub notatki (`description`) listy. Dozwolona **tylko dla właściciela** listy.
 - **DELETE** – usunięcie listy (kaskadowo: członkostwa, pozycje, kody zaproszeń). Dozwolone **tylko dla właściciela**.
 
 Wymagane jest uwierzytelnienie (JWT w sesji Supabase). Brak sesji → **401 Unauthorized**. Dostęp do listy wymaga bycia ownerem lub posiadania wpisu w `list_memberships`; PATCH i DELETE wymagają roli owner.
@@ -27,8 +27,8 @@ Wymagane jest uwierzytelnienie (JWT w sesji Supabase). Brak sesji → **401 Unau
 
 - **Parametry ścieżki:** `listId` (UUID).
 - **Request body (JSON):**
-  - **Opcjonalne:** `name` (string, max 100 znaków), `color` (string, max 20 znaków, np. hex).
-  - **Walidacja:** co najmniej jedno z pól (`name` lub `color`) musi być podane; reguły jak w POST /api/lists (name niepuste, max 100; color max 20).
+  - **Opcjonalne:** `name` (string, max 100 znaków), `color` (string, max 20 znaków, np. hex), `description` (string, max 500 znaków).
+  - **Walidacja:** co najmniej jedno z pól (`name`, `color` lub `description`) musi być podane; reguły jak w POST /api/lists.
 
 ### DELETE
 
@@ -40,9 +40,9 @@ Wymagane jest uwierzytelnienie (JWT w sesji Supabase). Brak sesji → **401 Unau
 ## 3. Wykorzystywane typy
 
 - **ListDetailDto** (`src/types.ts`) – odpowiedź GET i PATCH:  
-  `id`, `owner_id`, `name`, `color`, `created_at`, `updated_at`, `is_disabled`, `my_role`.
+  `id`, `owner_id`, `name`, `color`, `description`, `created_at`, `updated_at`, `is_disabled`, `my_role`.
 - **UpdateListCommand** (`src/types.ts`) – body PATCH:  
-  `Partial<Pick<ListRow, "name" | "color">>`; w warstwie API wymagane „at least one field”.
+  `Partial<Pick<ListRow, "name" | "color" | "description">>`; w warstwie API wymagane „at least one field”.
 - **MembershipRole** (`src/types.ts`) – `"owner" | "editor"` dla `my_role`.
 
 Żadne nowe typy DTO/Command nie są wymagane; istniejące definicje pokrywają specyfikację.
@@ -60,6 +60,7 @@ Wymagane jest uwierzytelnienie (JWT w sesji Supabase). Brak sesji → **401 Unau
     "owner_id": "uuid",
     "name": "string",
     "color": "#hex",
+    "description": "string",
     "created_at": "ISO8601",
     "updated_at": "ISO8601",
     "is_disabled": false,
@@ -98,11 +99,11 @@ Wymagane jest uwierzytelnienie (JWT w sesji Supabase). Brak sesji → **401 Unau
    - Pobranie użytkownika: `supabase.auth.getUser()`. Brak użytkownika lub błąd auth → **401**.
    - Walidacja `listId` (UUID). Nieprawidłowy format → **404** (lub 400; zalecane 404 dla spójności z „zasób nie znaleziony”).
    - **GET:** wywołanie `getListById(supabase, userId, listId)`. Zwrot `null` lub brak dostępu → **404** lub **403** (zgodnie z przyjętą konwencją). Sukces → **200** + `ListDetailDto`.
-   - **PATCH:** parsowanie body (JSON); walidacja Zod (co najmniej jedno pole; name/color jak w POST). Błąd walidacji → **400**. Wywołanie `updateList(supabase, userId, listId, body)`. Brak listy / brak dostępu → **404** / **403**; nie-owner → **403**. Sukces → **200** + `ListDetailDto`.
+   - **PATCH:** parsowanie body (JSON); walidacja Zod (co najmniej jedno pole; name/color/description jak w POST). Błąd walidacji → **400**. Wywołanie `updateList(supabase, userId, listId, body)`. Brak listy / brak dostępu → **404** / **403**; nie-owner → **403**. Sukces → **200** + `ListDetailDto`.
    - **DELETE:** wywołanie `deleteList(supabase, userId, listId)`. Brak listy / brak dostępu → **404** / **403**; nie-owner → **403**. Sukces → **204** bez body.
 4. **Serwis (list.service.ts):**
    - **getListById** – select listy z joinem `list_memberships` po `list_id` i `user_id = userId`. Brak wiersza → użytkownik nie ma dostępu lub lista nie istnieje (można rozdzielić: osobny select listy po id, potem członkostwo). Zwrot `ListDetailDto` z `is_disabled` (użycie istniejącej logiki `computeDisabledListIds`) i `my_role`.
-   - **updateList** – sprawdzenie, czy użytkownik jest ownerem (np. select `lists` where id + owner_id, lub członkostwo z role = 'owner'). Nie owner → rzut błędu (np. `ForbiddenError`). Update `lists` tylko kolumn `name`/`color` (tylko przekazane pola). Po update pobranie zaktualizowanej listy i zbudowanie `ListDetailDto` (is_disabled, my_role).
+   - **updateList** – sprawdzenie, czy użytkownik jest ownerem (np. select `lists` where id + owner_id, lub członkostwo z role = 'owner'). Nie owner → rzut błędu (np. `ForbiddenError`). Update `lists` tylko kolumn `name`/`color`/`description` (tylko przekazane pola). Po update pobranie zaktualizowanej listy i zbudowanie `ListDetailDto` (is_disabled, my_role).
    - **deleteList** – sprawdzenie owner (jak wyżej). Nie owner → rzut błędu. Usunięcie wiersza z `lists` (kaskada w DB usunie `list_memberships`, `list_items`, `invite_codes`).
 5. **Baza danych** – Supabase (PostgreSQL). RLS na `lists`: SELECT dla owner lub członka; UPDATE/DELETE tylko dla owner. Backend i tak jawnie weryfikuje owner dla PATCH/DELETE i dostęp (owner lub membership) dla GET.
 
@@ -116,7 +117,7 @@ Wymagane jest uwierzytelnienie (JWT w sesji Supabase). Brak sesji → **401 Unau
   - **PATCH / DELETE:** tylko owner. Editor otrzymuje 403.
 - **Walidacja wejścia:**
   - `listId` – format UUID (Zod/regex), zapobieganie injection (Supabase parametryzowane zapytania).
-  - PATCH body – tylko pola `name` i `color`; długości zgodne ze schematem DB (name ≤ 100, color ≤ 20); brak przyjmowania `id`, `owner_id`, `created_at`, `updated_at`.
+  - PATCH body – tylko pola `name`, `color` i/lub `description`; długości zgodne ze schematem DB (name ≤ 100, color ≤ 20, description ≤ 500); brak przyjmowania `id`, `owner_id`, `created_at`, `updated_at`.
 - **Idempotencja:** DELETE według spec zwraca 204; przy ponownym wywołaniu lista już nie istnieje – można zwrócić 404 po pierwszym udanym usunięciu (zalecane).
 - **RLS:** polityki Supabase są uzupełnieniem; logika „tylko owner może PATCH/DELETE” i „owner lub member może GET” musi być egzekwowana w serwisie i zwracać odpowiednie 403/404.
 

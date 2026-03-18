@@ -34,6 +34,9 @@ type ListItemWithCodeRow = ListItemRow & { categories: { code: string } | null }
  * Returns paginated list items for a list the user can access.
  * Joins categories for category_code; default sort: is_purchased asc (unpurchased first), then category_id, created_at.
  *
+ * Important: We intentionally do NOT sort by `is_purchased`.
+ * Otherwise toggling the purchased flag would reorder items on the list.
+ *
  * @param supabase - Supabase client from context.locals (user JWT)
  * @param userId - auth.uid()
  * @param listId - List UUID (caller must validate; getListById checks access)
@@ -60,7 +63,6 @@ export async function listItems(
     .from("list_items")
     .select("*, categories(code)", { count: "exact" })
     .eq("list_id", listId)
-    .order("is_purchased", { ascending: true })
     .order("category_id", { ascending: true })
     .order("created_at", { ascending: true })
     .range(from, to);

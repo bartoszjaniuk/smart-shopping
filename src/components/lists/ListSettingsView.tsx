@@ -120,7 +120,7 @@ const ListSettingsView: FC<ListSettingsViewProps> = ({ listId, onOpenDeleteListM
       <header className="space-y-1">
         <h2 className="text-base font-semibold tracking-tight">Ustawienia listy</h2>
         <p className="text-sm text-muted-foreground">
-          Zmień nazwę listy i jej kolor. Tylko właściciel może edytować te ustawienia.
+          Zmień nazwę listy, jej kolor oraz notatkę. Tylko właściciel może edytować te ustawienia.
         </p>
         <p className="text-xs text-muted-foreground">
           Aktualna lista: <span className="font-medium">{list.name}</span>
@@ -134,6 +134,7 @@ const ListSettingsView: FC<ListSettingsViewProps> = ({ listId, onOpenDeleteListM
         initialValues={{
           name: list.name,
           color: list.color ?? DEFAULT_LIST_COLOR,
+          description: list.description ?? "",
         }}
         onSuccessUpdate={handleSuccessUpdate}
       />

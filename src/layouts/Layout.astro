@@ -15,6 +15,9 @@ const themeInitScript = `
   var dark = stored === "dark" || (!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.classList.toggle("dark", dark);
   if (stored) document.documentElement.dataset.theme = stored;
+
+  var locale = (localStorage.getItem("preferred_locale") || "").toLowerCase();
+  if (locale === "pl" || locale === "en") document.documentElement.lang = locale;
 })();
 `;
 ---

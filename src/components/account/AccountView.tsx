@@ -64,7 +64,9 @@ const AccountView: FC = () => {
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center justify-start gap-2">
+      <div className="space-y-4">{renderContent()}</div>
+
+      <div className="my-6 flex flex-wrap items-center justify-start gap-2">
         <button
           type="button"
           onClick={() => void logout()}
@@ -75,8 +77,6 @@ const AccountView: FC = () => {
           {isLoggingOut ? "Wylogowywanie…" : "Wyloguj"}
         </button>
       </div>
-
-      <div className="space-y-4">{renderContent()}</div>
 
       <PremiumFakeDoorModal open={isPremiumModalOpen} onClose={handleClosePremiumModal} />
     </>

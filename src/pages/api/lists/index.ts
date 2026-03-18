@@ -64,7 +64,7 @@ export const GET: APIRoute = async (context) => {
 
 /**
  * POST /api/lists
- * Body: { name: string (required, max 100), color?: string (optional, max 20) }
+ * Body: { name: string (required, max 100), color?: string (optional, max 20), description?: string (optional, max 500) }
  * Returns 201 with ListDto, or 400/401/403/500 with error payload.
  */
 export const POST: APIRoute = async (context) => {
@@ -89,7 +89,7 @@ export const POST: APIRoute = async (context) => {
     return json({ error: "Invalid JSON body" }, 400);
   }
 
-  let validatedBody: { name: string; color: string };
+  let validatedBody: { name: string; color: string; description: string };
   try {
     validatedBody = parseCreateListBody(rawBody);
   } catch (err) {

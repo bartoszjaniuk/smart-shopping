@@ -21,7 +21,7 @@ Endpoint **GET /api/lists** zwraca paginowaną listę list zakupów, do których
 ## 3. Wykorzystywane typy
 
 - **ListSummaryDto** (`src/types.ts`) – element tablicy `data`:  
-  `id`, `owner_id`, `name`, `color`, `created_at`, `updated_at`, `is_disabled`, opcjonalnie `item_count`, `my_role`.
+  `id`, `owner_id`, `name`, `color`, `description`, `created_at`, `updated_at`, `is_disabled`, opcjonalnie `item_count`, `my_role`.
 - **PaginationMeta** (`src/types.ts`) – obiekt `meta`:  
   `page`, `page_size`, `total_count`.
 - **MembershipRole** (`src/types.ts`) – enum `"owner" | "editor"` dla `my_role`.
@@ -42,6 +42,7 @@ Endpoint **GET /api/lists** zwraca paginowaną listę list zakupów, do których
         "owner_id": "uuid",
         "name": "string",
         "color": "#hex",
+        "description": "string",
         "created_at": "ISO8601",
         "updated_at": "ISO8601",
         "is_disabled": false,

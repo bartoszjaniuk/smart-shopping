@@ -202,6 +202,7 @@ Wysokopoziomowe drzewo komponentów dla widoku `/lists`:
     - `ListForm` z polami:
       - nazwa listy (input tekstowy),
       - kolor (komponent `PastelColorPicker`).
+      - notatka (description) (textarea – opcjonalnie).
 - **Obsługiwane interakcje**:
   - Kliknięcie w `NewListButton` → otwarcie modala.
   - Wypełnienie formularza i submit → wywołanie `POST /api/lists`.
@@ -216,6 +217,7 @@ Wysokopoziomowe drzewo komponentów dla widoku `/lists`:
   - Frontend:
     - `name`: wymagane, max 100 znaków, trim spacji.
     - `color`: opcjonalne, długość max 20 znaków (hex), wybór z predefiniowanej palety.
+    - `description`: opcjonalne, max 500 znaków.
   - Backend:
     - Te same zasady plus plan limit (Basic 1 lista) – błąd `403`.
   - Komponent powinien:
@@ -263,6 +265,7 @@ Wysokopoziomowe drzewo komponentów dla widoku `/lists`:
     - `owner_id: string`
     - `name: string`
     - `color: string`
+    - `description: string`
     - `created_at: string`
     - `updated_at: string`
     - `is_disabled: boolean`
@@ -337,6 +340,7 @@ Te typy stanowią bazę dla typów widokowych (ViewModel) i integracji z API `/a
 - **Pola**:
   - `name: string`
   - `color?: string`
+  - `description?: string`
 
 Powinien odwzorowywać `CreateListCommand` z `src/types.ts` (bez pól serwerowych).
 
@@ -409,6 +413,8 @@ Powinien odwzorowywać `CreateListCommand` z `src/types.ts` (bez pól serwerowyc
 - **Body (`CreateListCommand`)**:
   - `name: string` – wymagane, max 100 znaków.
   - `color?: string` – hex, max 20 znaków; jeśli brak, backend ustawia `DEFAULT_LIST_COLOR`.
+  - `description?: string` – max 500 znaków; opcjonalna notatka.
+  - `description?: string` – max 500 znaków; opcjonalna notatka.
 - **Oczekiwana odpowiedź (201)**:
   - `ListDto` – podstawowe dane nowej listy.
 - **Obsługa błędów**:
@@ -452,6 +458,7 @@ Powinien odwzorowywać `CreateListCommand` z `src/types.ts` (bez pól serwerowyc
   - `POST /api/lists`:
     - `name` wymagane, długość ≤ 100 – weryfikujemy już w formularzu.
     - `color` długość ≤ 20, najlepiej ograniczyć wybór do zdefiniowanej palety.
+    - `description` opcjonalne, długość ≤ 500.
     - Plan Basic – max 1 lista:
       - UI może proaktywnie obliczać `ownedListsCount` i blokować przycisk „Nowa lista” z tooltipem,
       - mimo to musi obsłużyć `403` z API jako ostateczne źródło prawdy.

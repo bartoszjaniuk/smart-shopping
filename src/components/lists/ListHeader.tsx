@@ -40,6 +40,11 @@ const ListHeader: FC<ListHeaderProps> = ({ list, totalItems, purchasedItemsCount
               {totalItems} pozycji, {purchasedItemsCount} kupionych
             </span>
           </div>
+
+          {list.description?.trim() && (
+            <p className="whitespace-pre-wrap text-sm text-muted-foreground">{list.description}</p>
+          )}
+
           {list.is_disabled && (
             <p className="text-xs font-medium text-amber-700">
               Lista jest wyłączona – przekroczono limit planu. Możesz przeglądać produkty, ale nie możesz ich edytować.

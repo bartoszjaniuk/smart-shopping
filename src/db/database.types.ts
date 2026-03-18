@@ -219,6 +219,7 @@ export interface Database {
         Row: {
           color: string;
           created_at: string;
+          description: string;
           id: string;
           name: string;
           owner_id: string;
@@ -230,6 +231,7 @@ export interface Database {
           id?: string;
           name: string;
           owner_id: string;
+          description?: string;
           updated_at?: string;
         };
         Update: {
@@ -238,6 +240,7 @@ export interface Database {
           id?: string;
           name?: string;
           owner_id?: string;
+          description?: string;
           updated_at?: string;
         };
         Relationships: [];

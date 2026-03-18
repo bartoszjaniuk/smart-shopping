@@ -23,6 +23,7 @@ export const listFormSchema = z.object({
     .optional()
     .refine((value) => value === undefined || allowedColors.includes(value), "Wybierz kolor z dostępnej palety")
     .default(DEFAULT_LIST_COLOR),
+  description: z.string().trim().max(500, "Notatka może mieć maksymalnie 500 znaków").optional().default(""),
 });
 
 export type ListFormSchemaInput = z.infer<typeof listFormSchema>;

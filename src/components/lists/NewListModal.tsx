@@ -42,7 +42,7 @@ const NewListModal: FC<NewListModalProps> = ({ open, onOpenChange, onCreated }) 
               Nowa lista
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              Utwórz nową listę zakupów, nadaj jej nazwę i wybierz kolor, aby łatwiej ją odróżnić.
+              Utwórz nową listę zakupów, nadaj jej nazwę i wybierz kolor. Możesz też dodać notatkę.
             </p>
           </div>
 

@@ -1,6 +1,8 @@
 import type { FC } from "react";
 import { useState, useCallback } from "react";
 
+import { applyDocumentLocale, broadcastLocaleChange, normalizeAppLocale, setStoredAppLocale } from "../../lib/locale";
+
 const ALLOWED_LOCALES = [
   { value: "pl", label: "Polski" },
   { value: "en", label: "English" },
@@ -54,6 +56,13 @@ const ProfileForm: FC<ProfileFormProps> = ({ initialLocale, onSuccess, toast }) 
           toast?.(msg, "error");
           setIsSubmitting(false);
           return;
+        }
+
+        const normalized = normalizeAppLocale(value);
+        if (normalized) {
+          setStoredAppLocale(normalized);
+          applyDocumentLocale(normalized);
+          broadcastLocaleChange(normalized);
         }
 
         toast?.("Zapisano.", "success");

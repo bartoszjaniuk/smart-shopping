@@ -51,13 +51,14 @@ export function parseListsQuery(url: string): { page: number; pageSize: number }
 // POST /api/lists – request body
 // ---------------------------------------------------------------------------
 
-/** Schema for POST /api/lists request body. name required; color optional (max 20 chars). */
+/** Schema for POST /api/lists request body. name required; color optional; description optional (max 500 chars). */
 export const createListBodySchema = z.object({
   name: z
     .string({ required_error: "name is required" })
     .min(1, "name must not be empty")
     .max(100, "name must be at most 100 characters"),
   color: z.string().max(20, "color must be at most 20 characters").optional(),
+  description: z.string().trim().max(500, "description must be at most 500 characters").optional(),
 });
 
 export type CreateListBodyInput = z.infer<typeof createListBodySchema>;
@@ -71,11 +72,13 @@ export type CreateListBodyInput = z.infer<typeof createListBodySchema>;
 export function parseCreateListBody(raw: unknown): {
   name: string;
   color: string;
+  description: string;
 } {
   const parsed = createListBodySchema.parse(raw);
   return {
     name: parsed.name,
     color: parsed.color ?? DEFAULT_LIST_COLOR,
+    description: parsed.description ?? "",
   };
 }
 
@@ -118,9 +121,10 @@ export const updateListBodySchema = z
   .object({
     name: z.string().min(1, "name must not be empty").max(100, "name must be at most 100 characters").optional(),
     color: z.string().max(20, "color must be at most 20 characters").optional(),
+    description: z.string().trim().max(500, "description must be at most 500 characters").optional(),
   })
   .refine((data) => data.name !== undefined || data.color !== undefined, {
-    message: "At least one of name or color is required",
+    message: "At least one of name, color or description is required",
   });
 
 export type UpdateListBodyInput = z.infer<typeof updateListBodySchema>;
@@ -128,16 +132,18 @@ export type UpdateListBodyInput = z.infer<typeof updateListBodySchema>;
 /**
  * Validates and normalizes PATCH /api/lists/:listId body. Returns only fields that were provided.
  * @param raw - Raw JSON body (e.g. from context.request.json())
- * @returns Object with only the provided fields (name and/or color)
+ * @returns Object with only the provided fields (name and/or color and/or description)
  * @throws ZodError when validation fails (e.g. no fields, invalid lengths)
  */
 export function parseUpdateListBody(raw: unknown): {
   name?: string;
   color?: string;
+  description?: string;
 } {
   const parsed = updateListBodySchema.parse(raw);
-  const result: { name?: string; color?: string } = {};
+  const result: { name?: string; color?: string; description?: string } = {};
   if (parsed.name !== undefined) result.name = parsed.name;
   if (parsed.color !== undefined) result.color = parsed.color;
+  if (parsed.description !== undefined) result.description = parsed.description;
   return result;
 }
