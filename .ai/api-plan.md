@@ -190,7 +190,8 @@ Authentication is handled by **Supabase Auth** (email/password). The API expects
 - **Request body:** `{ "name": "string", "color": "string", "description": "string" }` (all optional).
 - **Validation:** Same as POST; at least one field required.
 - **Response (200):** Same as GET /api/lists/:listId.
-- **Errors:** `400 Bad Request`, `401 Unauthorized`, `403 Forbidden` (not owner), `404 Not Found`.
+- **Permissions (403):** `403 Forbidden` gdy użytkownik próbuje zmienić `name`/`color` bez uprawnień (editor może zmieniać tylko `description`).
+- **Errors:** `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`.
 
 **DELETE /api/lists/:listId**
 

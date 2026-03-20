@@ -812,6 +812,77 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
     }
   }, [isOffline, listId]);
 
+  const updateListDescription = useCallback(
+    async (description: string) => {
+      if (isOffline) {
+        setIsError(true);
+        setErrorMessage("Jesteś offline. Zapis notatki wymaga połączenia z siecią.");
+        throw new Error("offline");
+      }
+
+      const trimmed = description.trim();
+
+      setIsMutating(true);
+      setIsError(false);
+      setErrorMessage(undefined);
+
+      try {
+        const response = await fetch(`/api/lists/${listId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ description: trimmed }),
+        });
+
+        if (response.status === 401) {
+          if (typeof window !== "undefined") {
+            redirectToLoginWithRedirect(window.location.pathname + window.location.search);
+          }
+          return;
+        }
+
+        if (response.status === 403) {
+          setIsError(true);
+          setErrorMessage("Nie masz uprawnień do edycji notatki tej listy.");
+          throw new Error("forbidden");
+        }
+
+        if (response.status === 404) {
+          setIsError(true);
+          setErrorMessage("Lista nie istnieje lub nie masz do niej dostępu.");
+          throw new Error("not-found");
+        }
+
+        if (!response.ok) {
+          setIsError(true);
+          setErrorMessage("Nie udało się zapisać notatki. Spróbuj ponownie.");
+          throw new Error("failed");
+        }
+
+        const updated = (await response.json()) as ListDetailDto;
+        setList(updated);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "";
+
+        // For our own control-flow errors (403/404/etc.) we should not mark the whole app as offline.
+        if (message === "offline" || message === "forbidden" || message === "not-found" || message === "failed") {
+          throw err;
+        }
+
+        setIsError(true);
+        setErrorMessage("Wystąpił błąd połączenia podczas zapisywania notatki. Sprawdź sieć i spróbuj ponownie.");
+        setIsOffline(true);
+        setRealtimeStatus("offline");
+        throw err;
+      } finally {
+        setIsMutating(false);
+      }
+    },
+    [isOffline, listId]
+  );
+
   const viewModel: ListDetailViewModel = useMemo(() => {
     if (!list) {
       return {
@@ -873,6 +944,7 @@ export function useListDetail(listId: string, initialSession: InitialSessionForR
     togglePurchased,
     deleteItem,
     clearPurchased,
+    updateListDescription,
     refetchAll,
   };
 }

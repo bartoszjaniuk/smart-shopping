@@ -296,15 +296,19 @@ export interface UpdateListValidatedBody {
 }
 
 /**
- * Updates list name, color and/or description. Allowed only for the list owner.
+ * Updates list fields.
+ *
+ * Permission model:
+ * - owner: can update `name`, `color` and/or `description`
+ * - editor: can update `description` only
  *
  * @param supabase - Supabase client from context.locals (user JWT)
  * @param userId - auth.uid()
  * @param listId - List UUID
- * @param body - Validated body (only name and/or color and/or description; only provided fields are updated)
+ * @param body - Validated body (only name/color/description; only provided fields are updated)
  * @returns Updated list as ListDetailDto
  * @throws NotFoundError when list does not exist
- * @throws ForbiddenError when user is not the owner
+ * @throws ForbiddenError when user is not allowed to update requested fields
  * @throws Error on Supabase/DB errors – map to 500 in route
  */
 export async function updateList(
@@ -326,7 +330,27 @@ export async function updateList(
 
   if (!listRow) throw new NotFoundError("Not Found");
 
-  if (listRow.owner_id !== userId) throw new ForbiddenError("Forbidden");
+  const isOwner = listRow.owner_id === userId;
+  const hasNameOrColor = body.name !== undefined || body.color !== undefined;
+
+  if (!isOwner) {
+    // Editors can update only `description`.
+    if (hasNameOrColor || body.description === undefined) {
+      throw new ForbiddenError("Forbidden");
+    }
+
+    const { data: membership, error: membershipError } = await supabase
+      .from("list_memberships")
+      .select("role")
+      .eq("list_id", listId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (membershipError || !membership) {
+      // User does not have access to this list (or cannot be verified) → keep existing 403 behavior.
+      throw new ForbiddenError("Forbidden");
+    }
+  }
 
   const updatePayload: { name?: string; color?: string; description?: string } = {};
   if (body.name !== undefined) updatePayload.name = body.name;

@@ -18,10 +18,8 @@ interface ListDetailViewProps {
 }
 
 const ListDetailView: FC<ListDetailViewProps> = ({ listId, initialSession }) => {
-  const { viewModel, addItem, updateItem, togglePurchased, deleteItem, clearPurchased } = useListDetail(
-    listId,
-    initialSession ?? null
-  );
+  const { viewModel, addItem, updateItem, togglePurchased, deleteItem, clearPurchased, updateListDescription } =
+    useListDetail(listId, initialSession ?? null);
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
 
@@ -105,6 +103,7 @@ const ListDetailView: FC<ListDetailViewProps> = ({ listId, initialSession }) => 
         list={viewModel.list}
         totalItems={viewModel.items.length}
         purchasedItemsCount={viewModel.purchasedItems.length}
+        onUpdateDescription={(next) => updateListDescription(next)}
       />
 
       {/* Formularz dodawania produktu */}

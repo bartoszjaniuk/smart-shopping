@@ -5,7 +5,9 @@
 Trzy metody obsługiwane pod tym samym wzorcem URL (`/api/lists/:listId`) realizują operacje na pojedynczej liście zakupów:
 
 - **GET** – odczyt szczegółów listy (dla użytkownika z dostępem: owner lub editor). Zwracany jest obiekt z pól z bazy oraz pól obliczanych: `is_disabled`, `my_role`.
-- **PATCH** – aktualizacja nazwy i/lub koloru i/lub notatki (`description`) listy. Dozwolona **tylko dla właściciela** listy.
+- **PATCH** – aktualizacja listy.
+  - `name`/`color`: tylko dla właściciela
+  - `description`: dla właściciela i edytora
 - **DELETE** – usunięcie listy (kaskadowo: członkostwa, pozycje, kody zaproszeń). Dozwolone **tylko dla właściciela**.
 
 Wymagane jest uwierzytelnienie (JWT w sesji Supabase). Brak sesji → **401 Unauthorized**. Dostęp do listy wymaga bycia ownerem lub posiadania wpisu w `list_memberships`; PATCH i DELETE wymagają roli owner.
@@ -83,7 +85,8 @@ Wymagane jest uwierzytelnienie (JWT w sesji Supabase). Brak sesji → **401 Unau
 - **401 Unauthorized** – brak lub nieprawidłowa sesja.
 - **403 Forbidden** –
   - GET: użytkownik nie ma dostępu do listy (nie jest ownerem ani nie ma wpisu w `list_memberships`).
-  - PATCH / DELETE: użytkownik ma dostęp, ale nie jest właścicielem (np. jest tylko editorem).
+  - PATCH: użytkownik ma dostęp, ale nie może zaktualizować żądanych pól (np. editor nie może zmieniać `name`/`color`).
+  - DELETE: użytkownik ma dostęp, ale nie jest właścicielem (np. jest tylko editorem).
 - **404 Not Found** – lista o podanym `listId` nie istnieje (lub użytkownik nie ma do niej dostępu – w zależności od decyzji produktowej: spec pozwala na 403 „no access” i 404 „Not Found”; zalecane: 404 gdy brak listy w bazie, 403 gdy lista istnieje, ale użytkownik nie ma dostępu).
 - **400 Bad Request** – tylko PATCH: nieprawidłowa walidacja body (brak pól do aktualizacji, nieprawidłowy format, przekroczone limity długości).
 - **500 Internal Server Error** – błąd bazy/serwisu; po zalogowaniu zwracany generyczny komunikat.
@@ -103,8 +106,13 @@ Wymagane jest uwierzytelnienie (JWT w sesji Supabase). Brak sesji → **401 Unau
    - **DELETE:** wywołanie `deleteList(supabase, userId, listId)`. Brak listy / brak dostępu → **404** / **403**; nie-owner → **403**. Sukces → **204** bez body.
 4. **Serwis (list.service.ts):**
    - **getListById** – select listy z joinem `list_memberships` po `list_id` i `user_id = userId`. Brak wiersza → użytkownik nie ma dostępu lub lista nie istnieje (można rozdzielić: osobny select listy po id, potem członkostwo). Zwrot `ListDetailDto` z `is_disabled` (użycie istniejącej logiki `computeDisabledListIds`) i `my_role`.
-   - **updateList** – sprawdzenie, czy użytkownik jest ownerem (np. select `lists` where id + owner_id, lub członkostwo z role = 'owner'). Nie owner → rzut błędu (np. `ForbiddenError`). Update `lists` tylko kolumn `name`/`color`/`description` (tylko przekazane pola). Po update pobranie zaktualizowanej listy i zbudowanie `ListDetailDto` (is_disabled, my_role).
-   - **deleteList** – sprawdzenie owner (jak wyżej). Nie owner → rzut błędu. Usunięcie wiersza z `lists` (kaskada w DB usunie `list_memberships`, `list_items`, `invite_codes`).
+
+- **updateList** – sprawdzenie uprawnień wg roli:
+  - owner: może aktualizować `name`/`color`/`description`
+  - editor: może aktualizować tylko `description`
+    W przypadku niedozwolonych pól → `ForbiddenError`. Update `lists` tylko kolumn przekazanych w body. Po update pobranie zaktualizowanej listy i zbudowanie `ListDetailDto` (is_disabled, my_role).
+- **deleteList** – sprawdzenie owner (jak wyżej). Nie owner → rzut błędu. Usunięcie wiersza z `lists` (kaskada w DB usunie `list_memberships`, `list_items`, `invite_codes`).
+
 5. **Baza danych** – Supabase (PostgreSQL). RLS na `lists`: SELECT dla owner lub członka; UPDATE/DELETE tylko dla owner. Backend i tak jawnie weryfikuje owner dla PATCH/DELETE i dostęp (owner lub membership) dla GET.
 
 ---
@@ -114,26 +122,27 @@ Wymagane jest uwierzytelnienie (JWT w sesji Supabase). Brak sesji → **401 Unau
 - **Uwierzytelnienie:** każda z trzech metod wymaga poprawnej sesji Supabase (`getUser()`). Brak użytkownika → 401.
 - **Autoryzacja:**
   - **GET:** użytkownik musi być ownerem listy lub mieć wpis w `list_memberships` (rola owner lub editor). W przeciwnym razie 403 (lub 404, jeśli nie ujawniać istnienia listy).
-  - **PATCH / DELETE:** tylko owner. Editor otrzymuje 403.
+  - **PATCH:** owner może aktualizować `name`/`color`/`description`, editor tylko `description`. Próba edycji `name`/`color` przez editora → 403.
+  - **DELETE:** tylko owner. Editor otrzymuje 403.
 - **Walidacja wejścia:**
   - `listId` – format UUID (Zod/regex), zapobieganie injection (Supabase parametryzowane zapytania).
   - PATCH body – tylko pola `name`, `color` i/lub `description`; długości zgodne ze schematem DB (name ≤ 100, color ≤ 20, description ≤ 500); brak przyjmowania `id`, `owner_id`, `created_at`, `updated_at`.
 - **Idempotencja:** DELETE według spec zwraca 204; przy ponownym wywołaniu lista już nie istnieje – można zwrócić 404 po pierwszym udanym usunięciu (zalecane).
-- **RLS:** polityki Supabase są uzupełnieniem; logika „tylko owner może PATCH/DELETE” i „owner lub member może GET” musi być egzekwowana w serwisie i zwracać odpowiednie 403/404.
+- **RLS:** polityki Supabase są uzupełnieniem; logika „owner/editor może PATCH tylko `description`” oraz „tylko owner może DELETE” musi być egzekwowana w serwisie i zwracać odpowiednie 403/404.
 
 ---
 
 ## 7. Obsługa błędów
 
-| Scenariusz                                 | Kod | Reakcja                                                      |
-| ------------------------------------------ | --- | ------------------------------------------------------------ |
-| Brak/invalid sesji                         | 401 | `{ "error": "Unauthorized" }`                                |
-| Nieprawidłowy UUID `listId`                | 404 | `{ "error": "Not Found" }` (lub 400 z komunikatem walidacji) |
-| Lista nie istnieje                         | 404 | `{ "error": "Not Found" }`                                   |
-| Użytkownik nie ma dostępu do listy (GET)   | 403 | `{ "error": "Forbidden" }`                                   |
-| Użytkownik nie jest ownerem (PATCH/DELETE) | 403 | `{ "error": "Forbidden" }`                                   |
-| PATCH: brak pól / nieprawidłowa walidacja  | 400 | `{ "error": "Validation failed", "details": "..." }`         |
-| Błąd bazy / serwisu                        | 500 | `{ "error": "Internal server error" }`                       |
+| Scenariusz                                                  | Kod | Reakcja                                                      |
+| ----------------------------------------------------------- | --- | ------------------------------------------------------------ |
+| Brak/invalid sesji                                          | 401 | `{ "error": "Unauthorized" }`                                |
+| Nieprawidłowy UUID `listId`                                 | 404 | `{ "error": "Not Found" }` (lub 400 z komunikatem walidacji) |
+| Lista nie istnieje                                          | 404 | `{ "error": "Not Found" }`                                   |
+| Użytkownik nie ma dostępu do listy (GET)                    | 403 | `{ "error": "Forbidden" }`                                   |
+| Użytkownik nie ma uprawnień do żądanej aktualizacji (PATCH) | 403 | `{ "error": "Forbidden" }`                                   |
+| PATCH: brak pól / nieprawidłowa walidacja                   | 400 | `{ "error": "Validation failed", "details": "..." }`         |
+| Błąd bazy / serwisu                                         | 500 | `{ "error": "Internal server error" }`                       |
 
 W route’ach: przechwytywanie błędów z serwisu (np. `ForbiddenError`, „not found”) i mapowanie na 403/404; niełapane błędy (np. Supabase) logowanie i zwrot 500. Nie rejestrowanie błędów w dedykowanej tabeli błędów – spec i reguły tego nie wymagają; wystarczy `console.error` dla 500.
 

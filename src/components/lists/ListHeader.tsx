@@ -1,4 +1,5 @@
 import type { FC } from "react";
+import { useEffect, useState } from "react";
 
 import type { ListDetailDto } from "../../types";
 
@@ -6,10 +7,24 @@ interface ListHeaderProps {
   list: ListDetailDto;
   totalItems: number;
   purchasedItemsCount: number;
+  onUpdateDescription?: (next: string) => Promise<void>;
 }
 
-const ListHeader: FC<ListHeaderProps> = ({ list, totalItems, purchasedItemsCount }) => {
+const ListHeader: FC<ListHeaderProps> = ({ list, totalItems, purchasedItemsCount, onUpdateDescription }) => {
   const isOwner = list.my_role === "owner";
+  const canEditDescription = list.my_role === "owner" || list.my_role === "editor";
+
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [draftDescription, setDraftDescription] = useState(list.description ?? "");
+  const [isSavingDescription, setIsSavingDescription] = useState(false);
+  const [saveError, setSaveError] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!isEditingDescription) {
+      setDraftDescription(list.description ?? "");
+      setSaveError(undefined);
+    }
+  }, [list.description, isEditingDescription]);
 
   const handleNavigate = (path: string) => {
     if (typeof window !== "undefined") {
@@ -41,8 +56,76 @@ const ListHeader: FC<ListHeaderProps> = ({ list, totalItems, purchasedItemsCount
             </span>
           </div>
 
-          {list.description?.trim() && (
-            <p className="whitespace-pre-wrap text-sm text-muted-foreground">{list.description}</p>
+          {canEditDescription && (
+            <>
+              {!isEditingDescription ? (
+                <div className="space-y-1">
+                  {list.description?.trim() ? (
+                    <p className="whitespace-pre-wrap text-sm text-muted-foreground">{list.description}</p>
+                  ) : (
+                    <p className="whitespace-pre-wrap text-sm text-muted-foreground">Dodaj notatkę do tej listy.</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditingDescription(true);
+                      setDraftDescription(list.description ?? "");
+                      setSaveError(undefined);
+                    }}
+                    className="text-xs font-medium text-foreground/80 hover:text-foreground"
+                    aria-label="Edytuj notatkę listy"
+                  >
+                    Edytuj
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <textarea
+                    value={draftDescription}
+                    onChange={(e) => setDraftDescription(e.target.value)}
+                    rows={3}
+                    className="block w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    placeholder="Np. Lista przypomnień / co dodatkowo kupić..."
+                    aria-label="Notatka listy"
+                  />
+                  {saveError && <p className="text-xs text-destructive">{saveError}</p>}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!onUpdateDescription) return;
+                        setIsSavingDescription(true);
+                        setSaveError(undefined);
+                        try {
+                          await onUpdateDescription(draftDescription);
+                          setIsEditingDescription(false);
+                        } catch {
+                          setSaveError("Nie udało się zapisać notatki. Spróbuj ponownie.");
+                        } finally {
+                          setIsSavingDescription(false);
+                        }
+                      }}
+                      disabled={isSavingDescription}
+                      className="inline-flex min-h-[36px] items-center justify-center rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {isSavingDescription ? "Zapis..." : "Zapisz"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsEditingDescription(false);
+                        setDraftDescription(list.description ?? "");
+                        setSaveError(undefined);
+                      }}
+                      disabled={isSavingDescription}
+                      className="inline-flex min-h-[36px] items-center justify-center rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Anuluj
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {list.is_disabled && (

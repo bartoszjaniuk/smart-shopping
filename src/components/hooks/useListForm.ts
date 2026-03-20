@@ -11,11 +11,13 @@ interface UseListFormOptions {
   initialValues?: ListFormValues;
   plan?: PlanType;
   listId?: string;
+  showDescription?: boolean;
   onSuccessCreate?(list: ListDto | ListDetailDto): void;
   onSuccessUpdate?(list: ListDetailDto): void;
 }
 
 export function useListForm(options: UseListFormOptions) {
+  const showDescription = options.showDescription ?? true;
   const form = useForm<ListFormValues>({
     resolver: zodResolver(listFormSchema),
     defaultValues: {
@@ -71,7 +73,7 @@ export function useListForm(options: UseListFormOptions) {
     const payload = {
       name: values.name.trim(),
       color: values.color ?? DEFAULT_LIST_COLOR,
-      description: values.description?.trim() ?? "",
+      ...(showDescription ? { description: values.description?.trim() ?? "" } : {}),
     };
 
     try {
@@ -131,7 +133,7 @@ export function useListForm(options: UseListFormOptions) {
         body: JSON.stringify({
           name: payload.name,
           color: payload.color,
-          description: payload.description,
+          ...(showDescription ? { description: payload.description } : {}),
         }),
       });
 

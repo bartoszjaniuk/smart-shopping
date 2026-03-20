@@ -255,6 +255,8 @@ export interface ListFormProps {
   plan?: PlanType;
   /** Required in edit mode to call PATCH /api/lists/:listId. Ignored in create mode. */
   listId?: string;
+  /** Whether to show/edit the list description field. */
+  showDescription?: boolean;
   onSuccessCreate?(list: ListDto | ListDetailDto): void;
   onSuccessUpdate?(list: ListDetailDto): void;
   onCancel?(): void;
