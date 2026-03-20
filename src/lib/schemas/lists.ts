@@ -123,7 +123,7 @@ export const updateListBodySchema = z
     color: z.string().max(20, "color must be at most 20 characters").optional(),
     description: z.string().trim().max(500, "description must be at most 500 characters").optional(),
   })
-  .refine((data) => data.name !== undefined || data.color !== undefined, {
+  .refine((data) => data.name !== undefined || data.color !== undefined || data.description !== undefined, {
     message: "At least one of name, color or description is required",
   });
 
